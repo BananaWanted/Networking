@@ -1,0 +1,34 @@
+version: "3"
+services:
+  remote:
+    # https://hub.docker.com/_/python/
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - .:/workspace
+    links:
+      - postgres
+      - redis
+    environment:
+      - WORKERS=1
+      - DEBUG=1
+      - GOOGLE_APPLICATION_CREDENTIALS=/workspace/networking-8f79dc2d2fd4.json
+#    command: >-
+#      gunicorn application.app:app --worker-class sanic.worker.GunicornWorker
+#      --bind=0.0.0.0:80 --access-logfile - --error-logfile - --reload --reload-engine poll --capture-output
+#    command: sleep infinity
+  postgres:
+    # https://hub.docker.com/_/postgres/
+    image: postgres
+    volumes:
+      - ./.data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+#    entrypoint: bash -c "apt-get update && apt-get install -y postgresql-contrib && docker-entrypoint.sh postgres -c debug_pretty_print=on -c log_connections=on -c log_hostname=on -c log_statement=all"
+    entrypoint: bash -c "apt-get update && apt-get install -y postgresql-contrib && docker-entrypoint.sh postgres"
+  redis:
+    # https://hub.docker.com/_/redis/
+    image: redis
