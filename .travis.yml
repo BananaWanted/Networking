@@ -13,6 +13,11 @@ env:
 sudo: required
 services:
   - docker
+before_install:
+  # login into github
+  - git config --global user.email "builds@travis-ci.org"
+  - git config --global user.name "Travis CI"
+  - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
 install:
   - CURRENT_BRANCH=$TRAVIS_BRANCH
   - CURRENT_COMMIT=$TRAVIS_COMMIT
@@ -54,7 +59,7 @@ install:
           fi
       done
     fi
-  - echo building apps: ${BUILD_PENDING_APPS[*]}
+  - !!str echo building apps: ${BUILD_PENDING_APPS[*]}
 script:
   - |
     # build modified / new apps
