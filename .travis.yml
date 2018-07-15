@@ -39,7 +39,7 @@ install:
     REUSE_EXISTING_APPS=()
     if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
       echo master build, going to build all apps...
-      BUILD_PENDING_APPS=($APP_NAMES)
+      BUILD_PENDING_APPS=$APP_NAMES
     else
       echo branch build, scanning new/modified apps...
       for app_name in ${APP_NAMES[@]}; do
