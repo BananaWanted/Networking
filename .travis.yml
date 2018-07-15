@@ -24,7 +24,7 @@ install:
   - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
   # tag the commit
   - |
-    git tag $BUILD_TAG
+    git tag $BUILD_TAG -m '[skip ci]'
     git push origin $BUILD_TAG
   - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
   # pulling only happens on branch builds
@@ -64,7 +64,7 @@ script:
   - |
     # build modified / new apps
     for app_name in ${BUILD_PENDING_APPS[@]}; do
-      docker build --squash --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
+      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
     done
   - |
     # re-tag exists apps
