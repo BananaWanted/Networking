@@ -1,0 +1,86 @@
+# all builds:
+#   tag current commit with the CI build number in BUILD-<#> format
+#   tag image with build number (BUILD-<#>) if build succeed
+# branch builds:
+#   build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
+#   tag image with branch name, both existed apps & newly built apps
+# master builds:
+#   build all apps
+#   tag with build number and "latest"
+
+env:
+  - APP_NAMES="dns misc"
+sudo: required
+services:
+  - docker
+install:
+  - CURRENT_BRANCH=$TRAVIS_BRANCH
+  - CURRENT_COMMIT=$TRAVIS_COMMIT
+  - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
+  # tag the commit
+  - |
+    git tag $BUILD_TAG
+    git push origin $BUILD_TAG
+  - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+  # pulling only happens on branch builds
+  # prepare an array containing app names for building
+  - |
+    BUILD_PENDING_APPS=()
+    REUSE_EXISTING_APPS=()
+    if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
+      echo master build, going to build all apps...
+      BUILD_PENDING_APPS=($APP_NAMES)
+    else
+      echo branch build, scanning new/modified apps...
+      for app_name in "$APP_NAMES"; do
+          if docker pull $DOCKER_HUB_USERNAME/$app_name; then
+            APP_EXISTED=true
+          else
+            echo new app detected: $app_name
+            APP_EXISTED=false
+          fi
+          # exit code 0 means no diff vs exit code 1 means there were diff
+          if git diff --no-ext-diff --exit-code origin/master -- "$app_name"; then
+            APP_MODIFIED=false
+          else
+            echo modified app detected: $app_name
+            APP_MODIFIED=true
+          fi
+
+          if ! $APP_EXISTED || $APP_MODIFIED; then
+            BUILD_PENDING_APPS+=("$app_name")
+          else
+            REUSE_EXISTING_APPS+=("$app_name")
+          fi
+      done
+    fi
+  - echo building apps: ${BUILD_PENDING_APPS[*]}
+script:
+  - |
+    # build modified / new apps
+    for app_name in ${BUILD_PENDING_APPS[@]}; do
+      docker build --squash --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
+    done
+  - |
+    # re-tag exists apps
+    for app_name in ${REUSE_EXISTING_APPS[@]}; do
+      docker tag $DOCKER_HUB_USERNAME/$app_name $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
+    done
+
+after_success:
+  - |
+    # push images
+    for app_name in "$APP_NAMES"; do
+      docker push $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
+      if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
+        # override latest for master builds
+        docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
+        docker push $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
+      else
+        # tag branch name for branch builds
+        # TODO: is overridding latest tag ok?
+        docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name
+        docker push $DOCKER_HUB_USERNAME/$app_name
+      fi
+    done
+ 
