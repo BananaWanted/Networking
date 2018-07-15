@@ -59,7 +59,7 @@ install:
           fi
       done
     fi
-  - !!str echo building apps: ${BUILD_PENDING_APPS[*]}
+  - echo building apps ${BUILD_PENDING_APPS[*]}
 script:
   - |
     # build modified / new apps
