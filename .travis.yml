@@ -13,6 +13,9 @@ env:
 sudo: required
 services:
   - docker
+branches:
+  except:
+    - /^BUILD-/
 before_install:
   # login into github
   - git config --global user.email "builds@travis-ci.org"
@@ -24,7 +27,7 @@ install:
   - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
   # tag the commit
   - |
-    git tag $BUILD_TAG -m '[skip ci]'
+    git tag $BUILD_TAG
     git push origin $BUILD_TAG
   - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
   # pulling only happens on branch builds
