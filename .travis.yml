@@ -13,6 +13,14 @@ env:
 sudo: required
 services:
   - docker
+branches:
+  except:
+    - /^BUILD-/
+before_install:
+  # login into github
+  - git config --global user.email "builds@travis-ci.org"
+  - git config --global user.name "Travis CI"
+  - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
 install:
   - CURRENT_BRANCH=$TRAVIS_BRANCH
   - CURRENT_COMMIT=$TRAVIS_COMMIT
@@ -54,12 +62,12 @@ install:
           fi
       done
     fi
-  - echo building apps: ${BUILD_PENDING_APPS[*]}
+  - echo building apps ${BUILD_PENDING_APPS[*]}
 script:
   - |
     # build modified / new apps
     for app_name in ${BUILD_PENDING_APPS[@]}; do
-      docker build --squash --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
+      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
     done
   - |
     # re-tag exists apps
