@@ -16,6 +16,8 @@ services:
 branches:
   except:
     - /^BUILD-/
+  only:
+    - master
 before_install:
   # login into github
   - git config --global user.email "builds@travis-ci.org"
@@ -74,8 +76,6 @@ script:
     for app_name in ${REUSE_EXISTING_APPS[@]}; do
       docker tag $DOCKER_HUB_USERNAME/$app_name $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
     done
-
-after_success:
   - |
     # push images
     for app_name in "$APP_NAMES"; do
