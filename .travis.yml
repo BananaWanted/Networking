@@ -42,7 +42,7 @@ install:
       BUILD_PENDING_APPS=($APP_NAMES)
     else
       echo branch build, scanning new/modified apps...
-      for app_name in "$APP_NAMES"; do
+      for app_name in $APP_NAMES; do
           if docker pull $DOCKER_HUB_USERNAME/$app_name; then
             APP_EXISTED=true
           else
@@ -76,18 +76,24 @@ script:
     for app_name in ${REUSE_EXISTING_APPS[@]}; do
       docker tag $DOCKER_HUB_USERNAME/$app_name $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
     done
+  - docker images
+
+after_success:
   - |
     # push images
-    for app_name in "$APP_NAMES"; do
+    for app_name in $APP_NAMES; do
+      echo pushing $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
       docker push $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
       if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
         # override latest for master builds
         docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
+        echo pushing $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
         docker push $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
       else
         # tag branch name for branch builds
         # TODO: is overridding latest tag ok?
         docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name
+        echo pushing $DOCKER_HUB_USERNAME/$app_name
         docker push $DOCKER_HUB_USERNAME/$app_name
       fi
     done
