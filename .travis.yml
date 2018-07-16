@@ -24,9 +24,17 @@ before_install:
   - git config --global user.name "Travis CI"
   - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
 install:
+  # define variables
   - CURRENT_BRANCH=$TRAVIS_BRANCH
   - CURRENT_COMMIT=$TRAVIS_COMMIT
   - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
+  - BUILD_PENDING_APPS=()
+  - REUSE_EXISTING_APPS=()
+  - |
+    echo CURRENT_BRANCH = $CURRENT_BRANCH
+    echo CURRENT_COMMIT = $CURRENT_COMMIT
+    echo BUILD_TAG = $BUILD_TAG
+    echo TRAVIS_PULL_REQUEST = $TRAVIS_PULL_REQUEST
   # tag the commit
   - |
     git tag $BUILD_TAG
@@ -35,8 +43,6 @@ install:
   # pulling only happens on branch builds
   # prepare an array containing app names for building
   - |
-    BUILD_PENDING_APPS=()
-    REUSE_EXISTING_APPS=()
     if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
       echo master build, going to build all apps...
       BUILD_PENDING_APPS=($APP_NAMES)
@@ -76,7 +82,6 @@ script:
     for app_name in ${REUSE_EXISTING_APPS[@]}; do
       docker tag $DOCKER_HUB_USERNAME/$app_name $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
     done
-  - docker images
 
 after_success:
   - |
@@ -97,4 +102,5 @@ after_success:
         docker push $DOCKER_HUB_USERNAME/$app_name
       fi
     done
+  - docker images
  
