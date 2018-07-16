@@ -91,16 +91,15 @@ after_success:
       docker push $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG
       if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
         # override latest for master builds
-        docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
-        echo pushing $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
-        docker push $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
-      else
-        # tag branch name for branch builds
-        # TODO: is overridding latest tag ok?
         docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name
         echo pushing $DOCKER_HUB_USERNAME/$app_name
         docker push $DOCKER_HUB_USERNAME/$app_name
       fi
+      # tag branch name for all builds
+      # TODO: is overridding latest tag ok?
+      docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
+      echo pushing $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
+      docker push $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
     done
   - docker images
  
