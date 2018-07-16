@@ -13,13 +13,17 @@ env:
 sudo: required
 services:
   - docker
+notifications:
+  email:
+    on_success: always
+    on_failure: always
 branches:
   only:
     - master
 before_install:
   # login into github
-  - git config --global user.email "builds@travis-ci.org"
-  - git config --global user.name "Travis CI"
+# - git config --global user.email "builds@travis-ci.org"
+# - git config --global user.name "Travis CI"
   - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
 install:
   # define variables
