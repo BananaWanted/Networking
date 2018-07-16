@@ -1,12 +1,12 @@
 # all builds:
 #   tag current commit with the CI build number in BUILD-<#> format
 #   tag image with build number (BUILD-<#>) if build succeed
-# branch builds:
+# PR builds:
 #   build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
-#   tag image with branch name, both existed apps & newly built apps
+#   tag image with PR branch name, both existed apps & newly built apps
 # master builds:
 #   build all apps
-#   tag with build number and "latest"
+#   tag with build number and "latest" and "master"
 
 env:
   - APP_NAMES="dns misc"
@@ -14,8 +14,6 @@ sudo: required
 services:
   - docker
 branches:
-  except:
-    - /^BUILD-/
   only:
     - master
 before_install:
@@ -25,29 +23,23 @@ before_install:
   - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
 install:
   # define variables
-  - CURRENT_BRANCH=$TRAVIS_BRANCH
-  - CURRENT_COMMIT=$TRAVIS_COMMIT
+  - "CURRENT_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}"
   - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
   - BUILD_PENDING_APPS=()
   - REUSE_EXISTING_APPS=()
-  - |
-    echo CURRENT_BRANCH = $CURRENT_BRANCH
-    echo CURRENT_COMMIT = $CURRENT_COMMIT
-    echo BUILD_TAG = $BUILD_TAG
-    echo TRAVIS_PULL_REQUEST = $TRAVIS_PULL_REQUEST
   # tag the commit
   - |
     git tag $BUILD_TAG
     git push origin $BUILD_TAG
   - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
-  # pulling only happens on branch builds
+  # pulling only happens on PR builds
   # prepare an array containing app names for building
   - |
     if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then
       echo master build, going to build all apps...
       BUILD_PENDING_APPS=($APP_NAMES)
     else
-      echo branch build, scanning new/modified apps...
+      echo PR build, scanning new/modified apps...
       for app_name in $APP_NAMES; do
           if docker pull $DOCKER_HUB_USERNAME/$app_name; then
             APP_EXISTED=true
@@ -96,7 +88,6 @@ after_success:
         docker push $DOCKER_HUB_USERNAME/$app_name
       fi
       # tag branch name for all builds
-      # TODO: is overridding latest tag ok?
       docker tag $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
       echo pushing $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
       docker push $DOCKER_HUB_USERNAME/$app_name:$CURRENT_BRANCH
