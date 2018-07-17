@@ -8,8 +8,6 @@
 #   build all apps
 #   tag with build number and "latest" and "master"
 
-env:
-  - APP_NAMES="dns misc"
 sudo: required
 services:
   - docker
@@ -21,12 +19,11 @@ branches:
   only:
     - master
 before_install:
-  # login into github
-# - git config --global user.email "builds@travis-ci.org"
-# - git config --global user.name "Travis CI"
-  - git remote set-url origin $(git remote get-url origin | sed "s#https://#https://$GITHUB_TOKEN@#g")
+  - make ci_git_set_username_travis
+  - make ci_git_login
 install:
   # define variables
+  - APP_NAMES=$(make show_available_apps)
   - "CURRENT_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}"
   - BUILD_TAG=BUILD-$TRAVIS_BUILD_NUMBER
   - BUILD_PENDING_APPS=()
@@ -52,7 +49,7 @@ install:
             APP_EXISTED=false
           fi
           # exit code 0 means no diff vs exit code 1 means there were diff
-          if git diff --no-ext-diff --exit-code origin/master -- "$app_name"; then
+          if git diff --no-ext-diff --exit-code origin/master -- charts/$app_name; then
             APP_MODIFIED=false
           else
             echo modified app detected: $app_name
@@ -71,7 +68,7 @@ script:
   - |
     # build modified / new apps
     for app_name in ${BUILD_PENDING_APPS[@]}; do
-      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG "$app_name"
+      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG charts/$app_name
     done
   - |
     # re-tag exists apps
