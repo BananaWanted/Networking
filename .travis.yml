@@ -49,7 +49,7 @@ install:
             APP_EXISTED=false
           fi
           # exit code 0 means no diff vs exit code 1 means there were diff
-          if git diff --no-ext-diff --exit-code origin/master -- charts/$app_name; then
+          if git diff --no-ext-diff --exit-code origin/master -- applications/$app_name; then
             APP_MODIFIED=false
           else
             echo modified app detected: $app_name
@@ -68,7 +68,7 @@ script:
   - |
     # build modified / new apps
     for app_name in ${BUILD_PENDING_APPS[@]}; do
-      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG charts/$app_name
+      docker build --pull --no-cache -t $DOCKER_HUB_USERNAME/$app_name:$BUILD_TAG applications/$app_name
     done
   - |
     # re-tag exists apps

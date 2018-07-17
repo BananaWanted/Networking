@@ -7,7 +7,7 @@ helm_install:
 	$(kube_check_cluster_connectivity)
 
 show_available_apps:
-	@ls charts
+	@ls applications
 
 CURRENT_BRANCH ?= $(TRAVIS_PULL_REQUEST_BRANCH)
 CURRENT_BRANCH ?= $(TRAVIS_BRANCH)
