@@ -1,45 +1,34 @@
-# Default values for Networking.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+global:
+  # control the in-container environment
+  # set this flag to true to use the testing image.
+  # more details:
+  #   For each CI build, 2 different images are pushed to the registry, one is for production, another for testing.
+  #   The prod image is basing on a minimized base image, usually alpine based or from scratch. Any non-necessary
+  #   files like tests / scripts are not included in this image.
+  #   The testing image is built for easy to use, thus usually dabian/ubuntu based. It not only
+  #   includes the full source files but also installs testing dependencies such as ipdb, pytest in python apps.
+  #   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
+  #   a running container and perform interactive debugging is possible.
+  testing: false
 
-replicaCount: 1
-
-image:
-  repository: nginx
-  tag: stable
+  # common configs
   pullPolicy: IfNotPresent
 
-service:
-  type: ClusterIP
-  port: 80
+  service:
+    type: ClusterIP
+    port: 80
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  path: /
-  hosts:
-    - chart-example.local
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+# replicaCount: 1
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+# ingress:
+#   enabled: false
+#   annotations: {}
+#     # kubernetes.io/ingress.class: nginx
+#     # kubernetes.io/tls-acme: "true"
+#   path: /
+#   hosts:
+#     - chart-example.local
+#   tls: []
+#   #  - secretName: chart-example-tls
+#   #    hosts:
+#   #      - chart-example.local
