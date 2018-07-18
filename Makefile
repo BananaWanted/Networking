@@ -26,15 +26,11 @@ ifeq ($(TRAVIS_PULL_REQUEST), false)
 else
 # 0 means exists
 ifneq ($(shell docker pull $(DOCKER_HUB_USERNAME)/$@; echo $$?), 0)
-app_not_exists = yes
-else
-app_not_exists = 
+	$(eval app_not_exists := yes)
 endif
 # 0 means not modified, 1 means modified
 ifneq ($(shell git diff --no-ext-diff --exit-code origin/master -- applications/$@; echo $$?), 0)
-app_modified = yes
-else
-app_modified =
+	$(eval app_modified := yes)
 endif
 ifeq ($(and $(app_not_exists), $(app_modified)), yes)
 	$(MAKE) build-app-$@
@@ -45,22 +41,22 @@ endif
 	$(MAKE) docker-push-app-$@
 
 build-app-%:
-	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG) applications/$@
+	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
 
 retag-app-%:
-	docker tag $(DOCKER_HUB_USERNAME)/$@ $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG)
+	docker tag $(DOCKER_HUB_USERNAME)/$* $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
 
 docker-push-app-%:
-	@echo pushing $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG)
-	docker push $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG)
+	@echo pushing $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
 ifeq ($(TRAVIS_PULL_REQUEST), false)
 	# override latest for master builds
-	docker tag $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$@
-	docker push $(DOCKER_HUB_USERNAME)/$@
+	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*
+	docker push $(DOCKER_HUB_USERNAME)/$*
 endif
 	# tag branch name for all builds
-	docker tag $(DOCKER_HUB_USERNAME)/$@:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$@:$(CURRENT_BRANCH)
-	docker push $(DOCKER_HUB_USERNAME)/$@:$(CURRENT_BRANCH)
+	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
+	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
 
 ci_git_set_username_travis:
 	git config user.email "builds@travis-ci.org"
