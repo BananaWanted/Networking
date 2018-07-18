@@ -12,24 +12,24 @@ ci_build: ci_git_login ci_tag_the_commit ci_docker_login all
 $(APPS): $(BASE_APPS)
 
 $(APPS) $(BASE_APPS):
-# all builds:
-#	tag current commit with the CI build number in BUILD-<#> format
-#	tag image with build number (BUILD-<#>) if build succeed
-# PR builds:
-#	build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
-#	tag image with PR branch name, both existed apps & newly built apps
-# master builds:
-#	build all apps
-#	tag with build number and "latest" and "master"
+	# all builds:
+	#	tag current commit with the CI build number in BUILD-<#> format
+	#	tag image with build number (BUILD-<#>) if build succeed
+	# PR builds:
+	#	build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
+	#	tag image with PR branch name, both existed apps & newly built apps
+	# master builds:
+	#	build all apps
+	#	tag with build number and "latest" and "master"
 ifeq ($(TRAVIS_PULL_REQUEST), false)
 	$(MAKE) build-app-$@
 else
 # 0 means exists
-ifneq ($(shell docker pull $(DOCKER_HUB_USERNAME)/$@; echo $$?), 0)
+ifneq ($(shell docker pull $(DOCKER_HUB_USERNAME)/$@ 1>&2; echo $$?), 0)
 	$(eval app_not_exists := yes)
 endif
 # 0 means not modified, 1 means modified
-ifneq ($(shell git diff --no-ext-diff --exit-code origin/master -- applications/$@; echo $$?), 0)
+ifneq ($(shell git diff --no-ext-diff --exit-code origin/master -- applications/$@ 1>&2; echo $$?), 0)
 	$(eval app_modified := yes)
 endif
 ifeq ($(and $(app_not_exists), $(app_modified)), yes)
