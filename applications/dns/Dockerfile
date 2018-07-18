@@ -3,4 +3,5 @@ ARG BUILD_TAG
 FROM ${DOCKER_HUB_USERNAME}/sanie:${BUILD_TAG}
 
 COPY . .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt \
+    && rm -rf test/ tests/ script/ scripts/ Dockerfile* requirements*
