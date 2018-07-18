@@ -18,17 +18,17 @@ ci_build: ci_git_login ci_docker_login all ci_docker_push_images ci_tag_the_comm
 
 $(APPS): $(BASE_APPS)
 
+# all builds:
+#	tag current commit with the CI build number in BUILD-<#> format
+#	tag image with build number (BUILD-<#>) if build succeed
+# PR builds:
+#	build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
+#	tag image with PR branch name, both existed apps & newly built apps
+# master builds:
+#	build all apps
+#	tag with build number and "latest" and "master"
 $(APPS) $(BASE_APPS):
-	# all builds:
-	#	tag current commit with the CI build number in BUILD-<#> format
-	#	tag image with build number (BUILD-<#>) if build succeed
-	# PR builds:
-	#	build modified apps (by compare with master) / newly created apps (by trying to pull from "latest")
-	#	tag image with PR branch name, both existed apps & newly built apps
-	# master builds:
-	#	build all apps
-	#	tag with build number and "latest" and "master"
-	set -e; \
+	@set -e; \
 	if [[ $(IS_PULL_REQUEST) = "false" ]]; then \
 		$(MAKE) docker-build-app-$@; \
 	else \
