@@ -19,7 +19,7 @@ class ClientSetupView(HTTPMethodView):
         await request.app.session_flush()
 
         report_url = request.app.url_for(
-            'dns.ClientReportView',
+            'interactive_ddns.ClientReportView',
             secret_id=client.secret_id.hex,
             _external=True,
             _scheme=request.scheme,
