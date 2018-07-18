@@ -4,6 +4,7 @@ CURRENT_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH:-$(TRAVIS_BRANCH))
 BUILD_TAG := BUILD-$(TRAVIS_BUILD_NUMBER)
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
+SHELL = bash
 
 all: $(APPS)
 
@@ -21,23 +22,22 @@ $(APPS) $(BASE_APPS):
 	# master builds:
 	#	build all apps
 	#	tag with build number and "latest" and "master"
-ifeq ($(TRAVIS_PULL_REQUEST), false)
-	$(MAKE) build-app-$@
-else
-# 0 means exists
-ifneq ($(shell docker pull $(DOCKER_HUB_USERNAME)/$@ 1>&2; echo $$?), 0)
-	$(eval app_not_exists := yes)
-endif
-# 0 means not modified, 1 means modified
-ifneq ($(shell git diff --no-ext-diff --exit-code origin/master -- applications/$@ 1>&2; echo $$?), 0)
-	$(eval app_modified := yes)
-endif
-ifeq ($(and $(app_not_exists), $(app_modified)), yes)
-	$(MAKE) build-app-$@
-else
-	$(MAKE) retag-app-$@
-endif
-endif
+	set -e; \
+	if [[ $(TRAVIS_PULL_REQUEST) = "false" ]]; then \
+		$(MAKE) build-app-$@; \
+	else \
+		if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
+			app_not_exists=yes; \
+		fi; \
+		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@; then \
+			app_modified=yes; \
+		fi; \
+	fi; \
+	if [[ -n "$$app_not_exists" || -n "$$app_modified" ]]; then \
+		$(MAKE) build-app-$@; \
+	else \
+		$(MAKE) retag-app-$@; \
+	fi
 	$(MAKE) docker-push-app-$@
 
 build-app-%:
