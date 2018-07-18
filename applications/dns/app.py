@@ -2,12 +2,10 @@
 
 from sanic import Sanic
 
-import config
-from application.dns import bp
-from application.setup.db import setup_sqlalchemy, teardown_sqlalchemy
+from interactive_ddns import bp
+from setup.db import setup_sqlalchemy, teardown_sqlalchemy
 
 app = Sanic()
-app.config.from_object(config)
 
 
 @app.listener('before_server_start')
