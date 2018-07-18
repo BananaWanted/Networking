@@ -7,7 +7,7 @@ COPY . /workspace
 WORKDIR /workspace
 RUN pip install -r requirements.txt \
     && pip install -r requirements-test.txt \
-    && rm -rf .
+    && rm -rf *
 
 CMD ["/usr/local/bin/gunicorn", "--worker-class", "sanic.worker.GunicornWorker", "--bind=0.0.0.0:80", \
     "--access-logfile", "-", \

@@ -9,7 +9,7 @@ RUN apk update \
     && apk --no-cache add --virtual build-dependencies postgresql-dev gcc python3-dev musl-dev make \
     && pip install -r requirements.txt \
     && apk del --purge build-dependencies \
-    && rm -rf .
+    && rm -rf *
 
 CMD ["/usr/local/bin/gunicorn", "--worker-class", "sanic.worker.GunicornWorker", "--bind=0.0.0.0:80", \
     "--access-logfile", "-", \
