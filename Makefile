@@ -1,12 +1,16 @@
 APPS := dns misc
 BASE_APPS := sanic
-CURRENT_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH:-$(TRAVIS_BRANCH))
-DOCKER_HUB_USERNAME ?= library
-BUILD_TAG := BUILD-$(TRAVIS_BUILD_NUMBER)
-
-.EXPORT_ALL_VARIABLES:
-.PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 SHELL := bash
+BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
+CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
+IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
+DOCKER_HUB_USERNAME ?= library
+DOCKER_HUB_PASSWORD ?=
+DOCKER_BUILD_OPTIONS ?= --pull --no-cache
+DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)
+GITHUB_TOKEN ?=
+
+.PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all ci_build clean install test)
 
 all: $(APPS)
 
@@ -25,7 +29,7 @@ $(APPS) $(BASE_APPS):
 	#	build all apps
 	#	tag with build number and "latest" and "master"
 	set -e; \
-	if [[ $(TRAVIS_PULL_REQUEST) = "false" ]]; then \
+	if [[ $(IS_PULL_REQUEST) = "false" ]]; then \
 		$(MAKE) docker-build-app-$@; \
 	else \
 		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
@@ -35,16 +39,16 @@ $(APPS) $(BASE_APPS):
 				app_not_exists=yes; \
 			fi; \
 		fi; \
-	fi; \
-	if [[ -n "$$app_modified" || -n "$$app_not_exists" ]]; then \
-		$(MAKE) docker-build-app-$@; \
-	else \
-		$(MAKE) docker-retag-app-$@; \
+		if [[ -n "$$app_modified" || -n "$$app_not_exists" ]]; then \
+			$(MAKE) docker-build-app-$@; \
+		else \
+			$(MAKE) docker-retag-app-$@; \
+		fi; \
 	fi
 
 docker-build-app-%:
-	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
-	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
+	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
+	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
 
 docker-retag-app-%:
 	docker tag $(DOCKER_HUB_USERNAME)/$*:latest $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
@@ -54,7 +58,7 @@ docker-push-app-%:
 	@echo pushing $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
-ifeq ($(TRAVIS_PULL_REQUEST), false)
+ifeq ($(IS_PULL_REQUEST), false)
 	# override latest for master builds
 	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:latest
 	docker push $(DOCKER_HUB_USERNAME)/$*:latest
@@ -83,7 +87,7 @@ ci_docker_login:
 
 ci_docker_push_images:
 	# Use a dedicated job to push all images after all build succeed.
-	$(foreach app, $(APP) $(BASE_APPS), $(call docker-push-app-$(app)))
+	$(foreach app_name, $(APP) $(BASE_APPS), $(call docker-push-app-$(app_name)))
 
 system_name := $(shell uname -s)
 helm_install_cmd := $(if ifeq($(system_name), "Darwin), brew install kubernetes-helm, set -o pipefail; curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash)
