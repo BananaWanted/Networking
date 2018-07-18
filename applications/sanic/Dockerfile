@@ -5,7 +5,8 @@ EXPOSE 80
 
 COPY . /workspace
 WORKDIR /workspace
-RUN apk --update add --virtual build-dependencies postgresql-dev gcc python3-dev musl-dev \
+RUN apk update \
+    && apk --no-cache add --virtual build-dependencies postgresql-dev gcc python3-dev musl-dev make \
     && pip install -r requirements.txt \
     && apk del --purge build-dependencies \
     && rm -rf .

@@ -8,7 +8,7 @@ SHELL := bash
 
 all: $(APPS)
 
-ci_build: ci_git_login ci_docker_login all ci_tag_the_commit
+ci_build: ci_git_login ci_docker_login all ci_docker_push_images ci_tag_the_commit
 
 $(APPS): $(BASE_APPS)
 
@@ -24,7 +24,7 @@ $(APPS) $(BASE_APPS):
 	#	tag with build number and "latest" and "master"
 	set -e; \
 	if [[ $(TRAVIS_PULL_REQUEST) = "false" ]]; then \
-		$(MAKE) build-app-$@; \
+		$(MAKE) docker-build-app-$@; \
 	else \
 		if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
 			app_not_exists=yes; \
@@ -34,29 +34,35 @@ $(APPS) $(BASE_APPS):
 		fi; \
 	fi; \
 	if [[ -n "$$app_not_exists" || -n "$$app_modified" ]]; then \
-		$(MAKE) build-app-$@; \
+		$(MAKE) docker-build-app-$@; \
 	else \
-		$(MAKE) retag-app-$@; \
+		$(MAKE) docker-retag-app-$@; \
 	fi
-	$(MAKE) docker-push-app-$@
 
-build-app-%:
+docker-build-app-%:
 	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
+	docker build --pull --no-cache -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
 
-retag-app-%:
-	docker tag $(DOCKER_HUB_USERNAME)/$* $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
+docker-retag-app-%:
+	docker tag $(DOCKER_HUB_USERNAME)/$*:latest $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
+	docker tag $(DOCKER_HUB_USERNAME)/$*:latest-test $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
 
 docker-push-app-%:
 	@echo pushing $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
 ifeq ($(TRAVIS_PULL_REQUEST), false)
 	# override latest for master builds
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*
-	docker push $(DOCKER_HUB_USERNAME)/$*
+	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:latest
+	docker push $(DOCKER_HUB_USERNAME)/$*:latest
+	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:latest-test
+	docker push $(DOCKER_HUB_USERNAME)/$*:latest-test
 endif
 	# tag branch name for all builds
 	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
+	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
+	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
 
 ci_git_set_username_travis:
 	git config user.email "builds@travis-ci.org"
@@ -71,6 +77,10 @@ ci_tag_the_commit:
 
 ci_docker_login:
 	docker login -u $(DOCKER_HUB_USERNAME) -p $(DOCKER_HUB_PASSWORD)
+
+ci_docker_push_images:
+	# Use a dedicated job to push all images after all build succeed.
+	$(foreach app, $(APP) $(BASE_APPS), $(call docker-push-app-$(app)))
 
 system_name := $(shell uname -s)
 helm_install_cmd := $(if ifeq($(system_name), "Darwin), brew install kubernetes-helm, set -o pipefail; curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash)
