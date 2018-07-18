@@ -5,9 +5,9 @@ EXPOSE 80
 
 COPY . /workspace
 WORKDIR /workspace
-RUN apk update \
-    && apk add py3-psycopg2 \
+RUN apk --update add --virtual build-dependencies postgresql-dev gcc python3-dev musl-dev \
     && pip install -r requirements.txt \
+    && apk del --purge build-dependencies \
     && rm -rf .
 
 CMD ["/usr/local/bin/gunicorn", "--worker-class", "sanic.worker.GunicornWorker", "--bind=0.0.0.0:80", \
