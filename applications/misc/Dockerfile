@@ -1,15 +1,6 @@
-FROM python:3
+# ARG DOCKER_HUB_USERNAME
+# ARG BUILD_TAG
+FROM ${DOCKER_HUB_USERNAME}/sanie:${BUILD_TAG}
 
-ENV WORKERS=4
-
-COPY . /workspace
-WORKDIR /workspace
+COPY . .
 RUN pip install -r requirements.txt
-
-EXPOSE 80
-
-CMD gunicorn application.app:app \
-    --worker-class sanic.worker.GunicornWorker \
-    --bind=0.0.0.0:80 \
-    --access-logfile - \
-    --error-logfile -

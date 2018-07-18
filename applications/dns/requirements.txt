@@ -7,7 +7,7 @@ sanic
 # Sanic-WTF
 
 sqlalchemy
-psycopg2-binary
+psycopg2
 
 google-cloud-dns
 # sh
@@ -17,6 +17,3 @@ google-cloud-dns
 # PyNaCl
 
 gunicorn
-
-# for development
-ipdb

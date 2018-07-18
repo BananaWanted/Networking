@@ -6,7 +6,7 @@ from application.dns.client_report import ClientReportView
 from application.dns.client_setup import ClientSetupView
 from application.setup.db import init_table
 
-bp = Blueprint('dns', '/dns')
+bp = Blueprint('interactive_ddns', '/interactive_ddns')
 
 
 @bp.listener('before_server_start')
