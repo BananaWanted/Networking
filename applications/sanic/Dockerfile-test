@@ -1,0 +1,17 @@
+FROM python:stretch
+
+ENV WEB_CONCURRENCY=4
+EXPOSE 80
+
+COPY . /workspace
+WORKDIR /workspace
+RUN apt-get update \
+    && apt-get install -y python3-psycopg2 \
+    && pip install -r requirements.txt \
+    && pip install -r requirements-test.txt \
+    && rm -rf .
+
+CMD ["/usr/local/bin/gunicorn", "--worker-class", "sanic.worker.GunicornWorker", "--bind=0.0.0.0:80", \
+    "--access-logfile", "-", \
+    "--error-logfile", "-", \
+    "app:app"] 
