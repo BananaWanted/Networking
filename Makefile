@@ -4,6 +4,7 @@ CURRENT_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH:-$(TRAVIS_BRANCH))
 DOCKER_HUB_USERNAME ?= library
 BUILD_TAG := BUILD-$(TRAVIS_BUILD_NUMBER)
 
+.EXPORT_ALL_VARIABLES:
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 SHELL := bash
 
