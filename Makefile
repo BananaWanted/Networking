@@ -29,7 +29,7 @@ $(APPS) $(BASE_APPS):
 		if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
 			app_not_exists=yes; \
 		fi; \
-		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@; then \
+		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
 			app_modified=yes; \
 		fi; \
 	fi; \
