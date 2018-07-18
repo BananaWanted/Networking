@@ -85,7 +85,7 @@ ci_tag_the_commit:
 ci_docker_login:
 	docker login -u $(DOCKER_HUB_USERNAME) -p $(DOCKER_HUB_PASSWORD)
 
-ci_docker_push_images: $(addprefix docker-push-app-, $(APP) $(BASE_APPS))
+ci_docker_push_images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
 
 system_name := $(shell uname -s)
 helm_install_cmd := $(if ifeq($(system_name), "Darwin), brew install kubernetes-helm, set -o pipefail; curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash)
