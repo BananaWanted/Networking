@@ -1,6 +1,7 @@
 APPS := dns misc
 BASE_APPS := sanic
 CURRENT_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH:-$(TRAVIS_BRANCH))
+DOCKER_HUB_USERNAME := $(DOCKER_HUB_USERNAME:-library)
 BUILD_TAG := BUILD-$(TRAVIS_BUILD_NUMBER)
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
@@ -26,14 +27,15 @@ $(APPS) $(BASE_APPS):
 	if [[ $(TRAVIS_PULL_REQUEST) = "false" ]]; then \
 		$(MAKE) docker-build-app-$@; \
 	else \
-		if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
-			app_not_exists=yes; \
-		fi; \
 		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
 			app_modified=yes; \
+		else \
+			if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
+				app_not_exists=yes; \
+			fi; \
 		fi; \
 	fi; \
-	if [[ -n "$$app_not_exists" || -n "$$app_modified" ]]; then \
+	if [[ -n "$$app_modified" || -n "$$app_not_exists" ]]; then \
 		$(MAKE) docker-build-app-$@; \
 	else \
 		$(MAKE) docker-retag-app-$@; \
