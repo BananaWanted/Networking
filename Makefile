@@ -1,7 +1,7 @@
 APPS := dns misc
 BASE_APPS := sanic
 CURRENT_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH:-$(TRAVIS_BRANCH))
-DOCKER_HUB_USERNAME := $(DOCKER_HUB_USERNAME:-library)
+DOCKER_HUB_USERNAME ?= library
 BUILD_TAG := BUILD-$(TRAVIS_BUILD_NUMBER)
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
