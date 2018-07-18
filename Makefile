@@ -8,7 +8,7 @@ SHELL := bash
 
 all: $(APPS)
 
-ci_build: ci_git_login ci_tag_the_commit ci_docker_login all
+ci_build: ci_git_login ci_docker_login all ci_tag_the_commit
 
 $(APPS): $(BASE_APPS)
 
