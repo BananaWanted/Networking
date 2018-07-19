@@ -1,51 +1,47 @@
-apiVersion: apps/v1beta2
+{{- range $app, $config := .Values.appsConfig }}
+---
+{{- $imageTag := $config.imageTag | default $.Values.defaultConfig.imageTag }}
+{{- $replicas := $config.replicas | default $.Values.defaultConfig.replicas }}
+{{- $pullPolicy := $config.pullPolicy | default $.Values.defaultConfig.pullPolicy }}
+{{- $tcpPorts := $config.tcpPorts | default $.Values.defaultConfig.tcpPorts }}
+{{- $udpPorts := $config.udpPorts | default $.Values.defaultConfig.udpPorts }}
+{{- $chart := list $.Chart.Name $.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "Networking.fullname" . }}
+  name: {{ list $.Release.Name $app | join "-" }}
   labels:
-    app: {{ template "Networking.name" . }}
-    chart: {{ template "Networking.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: {{ $app }}
+    chart: {{ $chart }}
+    release: {{ $.Release.Name }}
+    build: {{ $imageTag }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ $replicas }}
   selector:
     matchLabels:
-      app: {{ template "Networking.name" . }}
-      release: {{ .Release.Name }}
+      app: {{ $app }}
+      chart: {{ $chart }}
+      release: {{ $.Release.Name }}
+      build: {{ $imageTag }}
   template:
     metadata:
       labels:
-        app: {{ template "Networking.name" . }}
-        release: {{ .Release.Name }}
+        app: {{ $app }}
+        chart: {{ $chart }}
+        release: {{ $.Release.Name }}
+        build: {{ $imageTag }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ $app }}
+          image: {{ list $app $imageTag | join ":" | quote }}
+          imagePullPolicy: {{ $pullPolicy }}
           ports:
-            - name: http
-              containerPort: 80
+          {{- range $i, $port := $tcpPorts }}
+            - containerPort: {{ $port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+          {{- end }}
+          {{- range $i, $port := $udpPorts }}
+            - containerPort: {{ $port }}
+              protocol: UDP
+          {{- end }}
+{{- end }}

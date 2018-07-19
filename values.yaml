@@ -10,17 +10,20 @@
 #   a running container and perform interactive debugging is possible.
 testing: false
 
-# common configs
-namespace: networking
+defaultConfig:
+  imageTag: latest
+  pullPolicy: IfNotPresent
+  replicas: 1
+  tcpPorts: [80]
+  udpPorts: []
 
-pullPolicy: IfNotPresent
-
+appsConfig:
+  dns: {}
+  misc: {}
 
 service:
     type: ClusterIP
     port: 80
-
-# replicaCount: 1
 
 # ingress:
 #   enabled: false

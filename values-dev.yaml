@@ -1,0 +1,8 @@
+testing: false
+
+defaultConfig:
+  imageTag: BUILD-debug
+
+appsConfig:
+  misc:
+    imageTag: latest
