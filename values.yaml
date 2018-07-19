@@ -1,20 +1,22 @@
-global:
-  # control the in-container environment
-  # set this flag to true to use the testing image.
-  # more details:
-  #   For each CI build, 2 different images are pushed to the registry, one is for production, another for testing.
-  #   The prod image is basing on a minimized base image, usually alpine based or from scratch. Any non-necessary
-  #   files like tests / scripts are not included in this image.
-  #   The testing image is built for easy to use, thus usually dabian/ubuntu based. It not only
-  #   includes the full source files but also installs testing dependencies such as ipdb, pytest in python apps.
-  #   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
-  #   a running container and perform interactive debugging is possible.
-  testing: false
+# control the in-container environment
+# set this flag to true to use the testing image.
+# more details:
+#   For each CI build, 2 different images are pushed to the registry, one is for production, another for testing.
+#   The prod image is basing on a minimized base image, usually alpine based or from scratch. Any non-necessary
+#   files like tests / scripts are not included in this image.
+#   The testing image is built for easy to use, thus usually dabian/ubuntu based. It not only
+#   includes the full source files but also installs testing dependencies such as ipdb, pytest in python apps.
+#   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
+#   a running container and perform interactive debugging is possible.
+testing: false
 
-  # common configs
-  pullPolicy: IfNotPresent
+# common configs
+namespace: networking
 
-  service:
+pullPolicy: IfNotPresent
+
+
+service:
     type: ClusterIP
     port: 80
 
