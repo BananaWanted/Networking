@@ -14,8 +14,8 @@ defaultConfig:
   imageTag: latest
   pullPolicy: IfNotPresent
   replicas: 1
-  tcpPorts: [80]
-  udpPorts: []
+  tcpPort: 80
+  udpPort: null
 
 appsConfig:
   dns: {}
