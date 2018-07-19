@@ -16,6 +16,9 @@ defaultConfig:
   replicas: 1
   tcpPort: 80
   udpPort: null
+  some_list: [1, 2, {
+    "haha": "yes"
+  }]
 
 appsConfig:
   dns: {}
