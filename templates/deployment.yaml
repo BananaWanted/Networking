@@ -1,29 +1,15 @@
-{{- range $app, $config := .Values.appsConfig }}
----
-
-{{- $imageTag := include "GetConfig" (list "imageTag" $config $) }}
-{{- $replicas := include "GetConfig" (list "replicas" $config $) }}
-{{- $pullPolicy := include "GetConfig" (list "pullPolicy" $config $) }}
-{{- $tcpPort := include "GetConfig" (list "tcpPort" $config $) }}
-{{- $udpPort := include "GetConfig" (list "udpPort" $config $) }}
+{{- range $app, $appConfig := .Values.appsConfig }}
+{{- $imageTag := include "GetConfig" (list $appConfig $.Values.defaultConfig "imageTag") }}
+{{- $replicas := include "GetConfig" (list $appConfig $.Values.defaultConfig "replicas") }}
+{{- $pullPolicy := include "GetConfig" (list $appConfig $.Values.defaultConfig "pullPolicy") }}
+{{- $tcpPort := include "GetConfig" (list $appConfig $.Values.defaultConfig "tcpPort") }}
+{{- $udpPort := include "GetConfig" (list $appConfig $.Values.defaultConfig "udpPort") }}
 {{- $chart := list $.Chart.Name $.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-
 note:
-  - {{ include "GetValueByPath" (list $ (list "Values" "defaultConfig" "some_list" 1)) }}
-  - {{ include "GetValueByPath" (list $ (list "Values" "defaultConfig" "some_list" 2)) }}
-  - {{ include "GetValueByPath" (list $ (list "Values" "defaultConfig" "some_list" 2 "haha")) }}
+  - {{ include "GetValue" (list $ (list "Values" "defaultConfig" "some_list" 1)) }}
+  - {{ include "GetValue" (list $ (list "Values" "defaultConfig" "some_list" 2)) }}
+  - {{ include "GetValue" (list $ (list "Values" "defaultConfig" "some_list" 2 "haha")) }}
   - {{ include "GetValue" (list $ "Values" "defaultConfig" "some_list" 2 "haha") }}
-  - {{ kindOf $.Values.defaultConfig }}
-  - {{ kindOf $.Values.defaultConfig.some_list }}
-  - {{ kindOf "xxx" }}
-  - {{ kindOf 1 }}
-  - {{ kindOf nil }}
-  - {{ typeOf $.Values.defaultConfig }}
-  - {{ typeOf $.Values.defaultConfig.some_list }}
-  - {{ typeOf "xxx" }}
-  - {{ typeOf 1 }}
-  - {{ typeOf nil }}
-  - {{ kindIs "slice" "sss" | toJson }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -63,4 +49,5 @@ spec:
             - containerPort: {{ $udpPort }}
               protocol: UDP
           {{- end }}
+---
 {{- end }}
