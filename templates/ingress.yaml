@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    chart: {{ list .Chart.Name .Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+    release: {{ .Release.Name }}
+    testing: {{ .Values.testing }}
+  annotations:
+
+spec:
+  {{- if not .Values.testing }}
+    tls:
+    - secretName: {{ .Values.tlsSecret }}
+  {{- end }}
+  http:
+    paths:
+    {{- range $app, $appConfig := .Values.appsConfig }}
+      {{- if $appConfig.ingress -}}
+        {{- with $ }}
+          {{- range $i, $ingressConfig:= $appConfig.ingress }}
+    - path: {{ $ingressConfig.path }}
+      backend:
+        serviceName: {{ list $.Release.Name $app | join "-" }}
+        servicePort: {{ $ingressConfig.port }}
+          {{ end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}

@@ -9,22 +9,29 @@
 #   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
 #   a running container and perform interactive debugging is possible.
 testing: false
+tlsSecret: tls-secret
 
 appsConfig:
   dns:
     build: latest
     pullPolicy: IfNotPresent
-    replicas: 1
+    replicas: 3
     serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
+    ingress:
+    - path: "/dns"
+      port: 80
   misc:
     build: latest
     pullPolicy: IfNotPresent
-    replicas: 1
+    replicas: 3
     serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
+    ingress:
+    - path: "/generate_204"
+      port: 80
 
 # ingress:
 #   enabled: false
