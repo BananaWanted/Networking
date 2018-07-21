@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 from sanic import Sanic
-from sanic.response import raw
+from sanic.response import json
 
 app = Sanic()
 
 
 @app.route("/generate_204")
 def generate_204(request):
-    return raw(status=204)
+    return json(None, 204)
 
 
 if __name__ == "__main__":
