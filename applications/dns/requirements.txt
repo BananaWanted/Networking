@@ -9,6 +9,7 @@ sanic
 sqlalchemy
 psycopg2
 
+# google-cloud
 google-cloud-dns
 # sh
 # fluent-logger
