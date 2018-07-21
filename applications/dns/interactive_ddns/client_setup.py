@@ -5,8 +5,8 @@ from sanic.request import Request
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from application.dns.orm import Client
-from application.setup.db import enable_session
+from interactive_ddns.orm import Client
+from setup.db import enable_session
 
 
 class ClientSetupView(HTTPMethodView):
