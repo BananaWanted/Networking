@@ -1,3 +1,15 @@
+{{- define "Networking.App.Label" -}} {{- /* params: app: String, appConfig: map, globalContext: map */ -}}
+{{- $app := index . 0 }}
+{{- $appConfig := index . 1 }}
+{{- $global := index . 2 }}
+{{- $chart := list $global.Chart.Name $global.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+app: {{ $app }}
+chart: {{ $chart }}
+release: {{ $global.Release.Name }}
+build: {{ $appConfig.build }}
+testing: {{ $global.Values.testing }}
+{{- end -}}
+
 {{- define "GetValueByPath" -}}
   {{- $obj := index $ 0 -}}
   {{- $keys := index $ 1 -}}

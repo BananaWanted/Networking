@@ -12,21 +12,19 @@ testing: false
 
 appsConfig:
   dns:
-    imageTag: latest
+    build: latest
     pullPolicy: IfNotPresent
     replicas: 1
+    serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
   misc:
-    imageTag: latest
+    build: latest
     pullPolicy: IfNotPresent
     replicas: 1
+    serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
-
-service:
-    type: ClusterIP
-    port: 80
 
 # ingress:
 #   enabled: false

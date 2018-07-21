@@ -1,35 +1,23 @@
-{{- define "Networking.Deployment.Label" -}}
-{{- $app := index . 0 }}
-{{- $appConfig := index . 1 }}
-{{- $global := index . 2 }}
-{{- $chart := list $global.Chart.Name $global.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-app: {{ $app }}  {{- if $global.Values.testing -}} -test {{- end }}
-chart: {{ $chart }}
-release: {{ $global.Release.Name }}
-build: {{ $appConfig.imageTag }} {{- if $global.Values.testing -}} -test {{- end }}
-testing: {{ $global.Values.testing }}
-{{- end -}}
-
 {{- range $app, $appConfig := .Values.appsConfig }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ list $.Release.Name $app | join "-" }}
   labels:
-    {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 4 }}
+    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
 spec:
   replicas: {{ $appConfig.replicas }}
   selector:
     matchLabels:
-      {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 6 }}
+      {{- include "Networking.App.Label" (list $app $appConfig $) | indent 6 }}
   template:
     metadata:
       labels:
-        {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 8 }}
+        {{- include "Networking.App.Label" (list $app $appConfig $) | indent 8 }}
     spec:
       containers:
         - name: {{ $app }}
-          image: {{ list $app $appConfig.imageTag | join ":" | quote }}
+          image: {{ list $app $appConfig.build | join ":" }} {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
           {{- if or $appConfig.tcpPorts $appConfig.udpPorts }}
           ports:

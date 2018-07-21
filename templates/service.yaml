@@ -1,0 +1,24 @@
+{{- range $app, $appConfig := .Values.appsConfig }}
+{{- if and $appConfig.serviceType (or $appConfig.tcpPorts $appConfig.udpPorts)}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ list $.Release.Name $app | join "-" }}
+  labels:
+    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
+spec:
+  type: {{ $appConfig.serviceType }}
+  ports:
+  {{- range $i, $tcpPort := $appConfig.tcpPorts }}
+  - port: {{ $tcpPort }}
+    protocol: TCP
+  {{- end }}
+  {{- range $i, $udpPort := $appConfig.udpPorts }}
+  - port: {{ $udpPort }}
+    protocol: UDP
+  {{- end }}
+  selector:
+    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
+---
+{{- end}}
+{{- end }}
