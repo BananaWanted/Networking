@@ -8,8 +8,8 @@ from sanic.request import Request
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from application.dns.orm import Client, ClientIPReport
-from application.setup.db import enable_session, async_sqlalchemy
+from interactive_ddns.orm import Client, ClientIPReport
+from setup.db import enable_session, async_sqlalchemy
 
 
 class ClientReportView(HTTPMethodView):

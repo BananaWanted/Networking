@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from sanic import Blueprint
 
-from application.dns import orm
-from application.dns.client_report import ClientReportView
-from application.dns.client_setup import ClientSetupView
-from application.setup.db import init_table
+from interactive_ddns import orm
+from interactive_ddns.client_report import ClientReportView
+from interactive_ddns.client_setup import ClientSetupView
+from setup.db import init_table
 
 bp = Blueprint('interactive_ddns', '/interactive_ddns')
 
