@@ -117,5 +117,8 @@ dev-purge:
 
 dev-reinstall: dev-purge dev-install
 
+dev-upgrade:
+	helm list -a -q | xargs -J % helm upgrade -f values-dev.yaml --force --recreate-pods --wait % .
+
 dev-status:
 	helm list -a -q | xargs helm status

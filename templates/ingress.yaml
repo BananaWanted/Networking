@@ -6,7 +6,10 @@ metadata:
     chart: {{ list .Chart.Name .Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
+  {{- if .Values.testing }}
   annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  {{- end }}
 
 spec:
   {{- if not .Values.testing }}
