@@ -1,7 +1,8 @@
+testing: true
+
 appsConfig:
   dns:
     imageTag: BUILD-debug
   misc:
-    testing: true
     imageTag: BUILD-debug
     tcpPorts: []
