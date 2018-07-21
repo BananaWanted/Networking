@@ -1,8 +1,7 @@
-testing: false
-
-defaultConfig:
-  imageTag: BUILD-debug
-
 appsConfig:
+  dns:
+    imageTag: BUILD-debug
   misc:
-    imageTag: latest
+    testing: true
+    imageTag: BUILD-debug
+    tcpPorts: []

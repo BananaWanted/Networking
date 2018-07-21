@@ -1,48 +1,45 @@
-{{- range $app, $appConfig := .Values.appsConfig }}
-{{- $imageTag := default $appConfig.imageTag $.Values.defaultConfig.imageTag }}
-{{- $replicas := default $appConfig.replicas $.Values.defaultConfig.replicas }}
-{{- $pullPolicy := default $appConfig.pullPolicy $.Values.defaultConfig.pullPolicy }}
-{{- $tcpPorts := default $appConfig.tcpPorts $.Values.defaultConfig.tcpPorts }}
-{{- $udpPorts := default $appConfig.udpPorts $.Values.defaultConfig.udpPorts }}
-{{- $chart := list $.Chart.Name $.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- define "Networking.Deployment.Label" -}}
+{{- $app := index . 0 }}
+{{- $appConfig := index . 1 }}
+{{- $global := index . 2 }}
+{{- $chart := list $global.Chart.Name $global.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+app: {{ $app }}  {{- if $appConfig.testing -}} -test {{- end }}
+chart: {{ $chart }}
+release: {{ $global.Release.Name }}
+build: {{ $appConfig.imageTag }} {{- if $appConfig.testing -}} -test {{- end }}
+{{- end -}}
 
+{{- range $app, $appConfig := .Values.appsConfig }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ list $.Release.Name $app | join "-" }}
   labels:
-    app: {{ $app }}
-    chart: {{ $chart }}
-    release: {{ $.Release.Name }}
-    build: {{ $imageTag }}
+    {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 4 }}
 spec:
-  replicas: {{ $replicas }}
+  replicas: {{ $appConfig.replicas }}
   selector:
     matchLabels:
-      app: {{ $app }}
-      chart: {{ $chart }}
-      release: {{ $.Release.Name }}
-      build: {{ $imageTag }}
+      {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 6 }}
   template:
     metadata:
       labels:
-        app: {{ $app }}
-        chart: {{ $chart }}
-        release: {{ $.Release.Name }}
-        build: {{ $imageTag }}
+        {{- include "Networking.Deployment.Label" (list $app $appConfig $) | indent 8 }}
     spec:
       containers:
         - name: {{ $app }}
-          image: {{ list $app $imageTag | join ":" | quote }}
-          imagePullPolicy: {{ $pullPolicy }}
+          image: {{ list $app $appConfig.imageTag | join ":" | quote }}
+          imagePullPolicy: {{ $appConfig.pullPolicy }}
+          {{- if or $appConfig.tcpPorts $appConfig.udpPorts }}
           ports:
-          {{- range $i, $tcpPort := $tcpPorts }}
+            {{- range $i, $tcpPort := $appConfig.tcpPorts }}
             - containerPort: {{ $tcpPort }}
               protocol: TCP
-          {{- end }}
-          {{- range $i, $udpPort := $udpPorts }}
+            {{- end }}
+            {{- range $i, $udpPort := $appConfig.udpPorts }}
             - containerPort: {{ $udpPort }}
               protocol: UDP
+            {{- end }}
           {{- end }}
 ---
 {{- end }}

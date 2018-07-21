@@ -8,21 +8,23 @@
 #   includes the full source files but also installs testing dependencies such as ipdb, pytest in python apps.
 #   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
 #   a running container and perform interactive debugging is possible.
-testing: false
-
-defaultConfig:
-  imageTag: latest
-  pullPolicy: IfNotPresent
-  replicas: 1
-  tcpPort: [80]
-  udpPort: []
-  some_list: [1, 2, {
-    "haha": "yes"
-  }]
+# testing: false
 
 appsConfig:
-  dns: {}
-  misc: {}
+  dns:
+    testing: false
+    imageTag: latest
+    pullPolicy: IfNotPresent
+    replicas: 1
+    tcpPorts: [80]
+    udpPorts: []
+  misc:
+    testing: false
+    imageTag: latest
+    pullPolicy: IfNotPresent
+    replicas: 1
+    tcpPorts: [80]
+    udpPorts: []
 
 service:
     type: ClusterIP
