@@ -7,7 +7,7 @@ app: {{ $app }}
 chart: {{ $chart }}
 release: {{ $global.Release.Name }}
 build: {{ $appConfig.build }}
-testing: {{ $global.Values.testing }}
+testing: {{ $global.Values.testing | quote }}
 {{- end -}}
 
 {{- define "GetValueByPath" -}}
