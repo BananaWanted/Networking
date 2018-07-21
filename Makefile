@@ -6,7 +6,7 @@ CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell 
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
 DOCKER_HUB_USERNAME ?= library
 DOCKER_HUB_PASSWORD ?=
-DOCKER_BUILD_OPTIONS ?= --no-cache --quiet
+DOCKER_BUILD_OPTIONS ?=
 DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
 
@@ -35,7 +35,7 @@ $(APPS) $(BASE_APPS):
 		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
 			app_modified=yes; \
 		else \
-			if ! docker pull $(DOCKER_HUB_USERNAME)/$@; then \
+			if ! ( docker pull $(DOCKER_HUB_USERNAME)/$@:latest && docker pull $(DOCKER_HUB_USERNAME)/$@:latest-test ); then \
 				app_not_exists=yes; \
 			fi; \
 		fi; \
@@ -94,3 +94,31 @@ kube_check_cluster_connectivity := set -o pipefail; kubectl cluster-info --reque
 helm_install:
 	$(helm_install_cmd)
 	$(kube_check_cluster_connectivity)
+
+minikube_install:
+	minikube addons enable kube-dns
+	minikube addons enable ingress
+
+minikube_dashboard:
+	minikube addons open dashboard
+
+dev-all:
+	eval $(minikube docker-env)
+	$(MAKE) all
+
+dev-install-dryrun:
+	helm install -f values-dev.yaml --debug --dry-run .
+
+dev-install:
+	helm install -f values-dev.yaml .
+
+dev-purge:
+	helm list -a -q | xargs helm delete --purge
+
+dev-reinstall: dev-purge dev-install
+
+dev-upgrade:
+	helm list -a -q | xargs -J % helm upgrade -f values-dev.yaml --force --recreate-pods --wait % .
+
+dev-status:
+	helm list -a -q | xargs helm status
