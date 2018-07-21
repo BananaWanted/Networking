@@ -14,8 +14,8 @@ defaultConfig:
   imageTag: latest
   pullPolicy: IfNotPresent
   replicas: 1
-  tcpPort: 80
-  udpPort: null
+  tcpPort: [80]
+  udpPort: []
   some_list: [1, 2, {
     "haha": "yes"
   }]
