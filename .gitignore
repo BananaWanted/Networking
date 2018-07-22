@@ -1,6 +1,7 @@
 .vscode
 .DS_Store
 .idea
+Makefile-local
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

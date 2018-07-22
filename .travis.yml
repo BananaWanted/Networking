@@ -9,6 +9,6 @@ branches:
   only:
     - master
 script:
-  - make ci_build
+  - make ci
 after_success:
   - docker images
