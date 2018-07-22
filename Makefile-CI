@@ -1,0 +1,32 @@
+.PHONY: ci ci_prepare_env ci_run ci_after_success ci_git_set_username_travis ci_git_login ci_tag_the_commit ci_docker_login ci_docker_push_images
+
+ci: ci_prepare_env ci_run ci_after_success
+
+ci_prepare_env: ci_install_helm ci_install_minikube ci_git_login ci_docker_login env_kubectl env_minikube env_helm
+	# verify kubernetes is ready for use
+	set -o pipefail; \
+	kubectl cluster-info --request-timeout=10 2>/dev/null | head -n 1
+	# install helm
+	helm init --wait
+	# verify helm installed
+	helm list
+
+ci_run: all
+
+ci_after_success: ci_docker_push_images ci_tag_the_commit
+
+ci_git_set_username_travis:
+	git config user.email "builds@travis-ci.org"
+	git config user.name "Travis CI"
+
+ci_git_login:
+	@git remote set-url origin $(shell git remote get-url origin | sed "s#https://#https://$(GITHUB_TOKEN)@#g")
+
+ci_docker_login:
+	docker login -u $(DOCKER_HUB_USERNAME) -p $(DOCKER_HUB_PASSWORD)
+
+ci_docker_push_images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
+
+ci_tag_the_commit:
+	git tag $(BUILD_TAG)
+	git push origin $(BUILD_TAG)
