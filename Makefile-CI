@@ -1,15 +1,8 @@
-.PHONY: ci ci_prepare_env ci_run ci_after_success ci_git_set_username_travis ci_git_login ci_tag_the_commit ci_docker_login ci_docker_push_images
+.PHONY: ci ci_prepare_env ci_run ci_after_success ci_git_set_username_travis ci_git_login ci_docker_login ci_docker_push_images ci_tag_the_commit
 
 ci: ci_prepare_env ci_run ci_after_success
 
-ci_prepare_env: ci_install_helm ci_install_minikube ci_git_login ci_docker_login env_kubectl env_minikube env_helm
-	# verify kubernetes is ready for use
-	set -o pipefail; \
-	kubectl cluster-info --request-timeout=10 2>/dev/null | head -n 1
-	# install helm
-	helm init --wait
-	# verify helm installed
-	helm list
+ci_prepare_env: ci_install_helm ci_install_minikube ci_git_login ci_docker_login env_kube_local
 
 ci_run: all
 

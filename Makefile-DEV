@@ -1,0 +1,36 @@
+.PHONY: dev_env dev dev-install-dryrun dev-install dev-purge dev-reinstall dev-upgrade dev-status dev-sqitch-init
+
+DEV_HELM_INSTALL_FLAGS = --values values-dev.yaml --set docker_image_path=$(DOCKER_HUB_USERNAME)
+
+dev_env: env_kube_local
+	minikube addons enable --alsologtostderr dashboard
+	minikube addons open dashboard
+
+dev:
+	# make sure you have ran `make dev_env` first
+	eval $(minikube docker-env) && $(MAKE) all
+
+dev-install-dryrun:
+	helm install $(DEV_HELM_INSTALL_FLAGS) --debug --dry-run --name $(RELEASE_NAME) .
+
+dev-install:
+	helm install $(DEV_HELM_INSTALL_FLAGS) --name $(RELEASE_NAME) .
+
+dev-purge:
+	helm delete --purge $(RELEASE_NAME)
+
+dev-reinstall: dev-purge dev-install
+
+dev-upgrade:
+	helm upgrade $(DEV_HELM_INSTALL_FLAGS) --force --recreate-pods --wait --install $(RELEASE_NAME) .
+
+dev-status:
+	helm status $(RELEASE_NAME)
+
+dev-sqitch-init:
+	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql init $(PROJECT_NAME) --uri $(PROJECT_URL) --engine pg
+
+dev-sqitch-%:
+	# examples:
+	# 	make dev-sqitch-add ARGS="001-add_user-gke_sidecar -n 'Add user for GKE sidecar proxy'"
+	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql $* $(ARGS)

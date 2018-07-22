@@ -1,3 +1,5 @@
+PROJECT_NAME = Networking
+PROJECT_URL = https://github.com/BananaWanted/Networking
 APPS = dns misc
 BASE_APPS = sanic
 SHELL = bash

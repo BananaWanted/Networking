@@ -40,3 +40,12 @@ endif
 	done
 	minikube addons enable kube-dns
 	minikube addons enable ingress
+
+env_kube_local: env_kubectl env_minikube env_helm
+	# verify kubernetes is ready for use
+	set -o pipefail; \
+	kubectl cluster-info --request-timeout=10 2>/dev/null | head -n 1
+	# install helm
+	helm init --wait
+	# verify helm installed
+	helm list
