@@ -17,7 +17,9 @@ spec:
     spec:
       containers:
         - name: {{ $app }}
-          image: {{ list $app $appConfig.build | join ":" }} {{- if $.Values.testing -}} -test {{- end }}
+          image:  {{ $.Values.docker_image_path -}} /
+                  {{- list $app $appConfig.build | join ":" }}
+                  {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
           {{- if or $appConfig.tcpPorts $appConfig.udpPorts }}
           ports:

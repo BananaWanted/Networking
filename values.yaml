@@ -9,7 +9,9 @@
 #   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
 #   a running container and perform interactive debugging is possible.
 testing: false
-tlsSecret: tls-secret
+docker_image_path: library  # path prefix for docker images, override this value in Makefile
+tlsSecret: tls-secret   # secret storing the tls certs for ingress
+staticIP: static-ip     # static-ip name (in gce) for ingress
 
 appsConfig:
   dns:
@@ -21,7 +23,7 @@ appsConfig:
     udpPorts: []
     ingress:
     - path: "/dns"
-      port: 80
+    - path: "/dns/*"
   misc:
     build: latest
     pullPolicy: IfNotPresent
@@ -31,7 +33,7 @@ appsConfig:
     udpPorts: []
     ingress:
     - path: "/generate_204"
-      port: 80
+      port: 80 # if absent the first port in tcpPorts is used
 
 # ingress:
 #   enabled: false

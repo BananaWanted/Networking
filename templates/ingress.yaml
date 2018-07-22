@@ -23,10 +23,10 @@ spec:
         {{- if $appConfig.ingress -}}
           {{- with $ }}
             {{- range $i, $ingressConfig:= $appConfig.ingress }}
-      - path: {{ $ingressConfig.path }}
+      - path: {{ $ingressConfig.path | quote }}
         backend:
           serviceName: {{ list $.Release.Name $app | join "-" }}
-          servicePort: {{ $ingressConfig.port }}
+          servicePort: {{ $ingressConfig.port | default (index $appConfig.tcpPorts 0) }}
             {{ end -}}
           {{- end -}}
         {{- end -}}

@@ -4,6 +4,7 @@ SHELL := bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
+RELEASE_NAME ?= default-release
 DOCKER_HUB_USERNAME ?= library
 DOCKER_HUB_PASSWORD ?=
 DOCKER_BUILD_OPTIONS ?=
@@ -103,22 +104,23 @@ minikube_dashboard:
 	minikube addons open dashboard
 
 dev-all:
-	eval $(minikube docker-env)
-	$(MAKE) all
+	eval $(minikube docker-env) && $(MAKE) all
+
+DEV_HELM_INSTALL_FLAGS := --values values-dev.yaml --set docker_image_path=$(DOCKER_HUB_USERNAME)
 
 dev-install-dryrun:
-	helm install -f values-dev.yaml --debug --dry-run .
+	helm install $(DEV_HELM_INSTALL_FLAGS) --debug --dry-run --name $(RELEASE_NAME) .
 
 dev-install:
-	helm install -f values-dev.yaml .
+	helm install $(DEV_HELM_INSTALL_FLAGS) --name $(RELEASE_NAME) .
 
 dev-purge:
-	helm list -a -q | xargs helm delete --purge
+	helm delete --purge $(RELEASE_NAME)
 
 dev-reinstall: dev-purge dev-install
 
 dev-upgrade:
-	helm list -a -q | xargs -J % helm upgrade -f values-dev.yaml --force --recreate-pods --wait % .
+	helm upgrade $(DEV_HELM_INSTALL_FLAGS) --force --recreate-pods --wait --install $(RELEASE_NAME) .
 
 dev-status:
-	helm list -a -q | xargs helm status
+	helm status $(RELEASE_NAME)
