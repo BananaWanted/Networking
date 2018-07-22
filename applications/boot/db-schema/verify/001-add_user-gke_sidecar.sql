@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT * from pg_roles WHERE rolename = 'gke_sidecar';
+SELECT 1/count(*) from pg_roles WHERE rolename = 'gke_sidecar';
 
 ROLLBACK;
