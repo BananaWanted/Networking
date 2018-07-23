@@ -44,7 +44,7 @@ env_minikube: env_kubectl env_brew
 	docker images > /dev/null
 ifdef MINIKUBE
 	@echo minikube found at $(MINIKUBE). starting...
-	minikube start --alsologtostderr
+	minikube status || minikube start --alsologtostderr
 else ifeq ($(SYSTEM_NAME), Darwin)
 	$(BREW) cask install minikube
 	minikube start --alsologtostderr --vm-driver hyperkit
@@ -55,11 +55,12 @@ else
 	sudo minikube start --alsologtostderr --vm-driver=none
 	minikube update-context
 endif
-	# waiting for booting
+	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
 	until kubectl get nodes -o jsonpath="$$JSONPATH" 2>&1 | grep -q "Ready=True"; do \
-		sleep 1; \
+		sleep 2; \
 	done
+	minikube status
 	minikube addons enable kube-dns
 	minikube addons enable ingress
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
@@ -83,8 +84,7 @@ SQITCH = $(shell command -v sqitch 2> /dev/null)
 
 env_kube_local: env_kubectl env_minikube env_helm
 	# verify kubernetes is ready for use
-	set -o pipefail; \
-	$(KUBECTL) cluster-info --request-timeout=10 2>/dev/null | head -n 1
+	$(KUBECTL) cluster-info --request-timeout=10
 	# install helm
 	$(HELM) init --upgrade --wait
 	# verify helm installed
