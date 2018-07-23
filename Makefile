@@ -75,7 +75,7 @@ sqitch-%:
 	# examples:
 	# 	make sqitch-add ARGS=""
 	# 	make sqitch-deploy
-	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql $* $(ARGS)
+	docker run --rm -v `realpath .`/applications/db-vcs/sqitch:/src docteurklein/sqitch:pgsql $* $(ARGS)
 
 # you may create a Makefile-local to override the variables.
 include Makefile-*
