@@ -8,7 +8,11 @@ dev_env: env_kube_local env_sqitch
 
 dev:
 	# make sure you have ran `make dev_env` first
-	eval $(minikube docker-env) && $(MAKE) all
+	eval $$(minikube docker-env) && $(MAKE) all
+
+dev-%:
+	# make sure you have ran `make dev_env` first
+	eval $$(minikube docker-env) && $(MAKE) $*
 
 dev-install-dryrun:
 	$(HELM) install $(DEV_HELM_INSTALL_FLAGS) --debug --dry-run --name $(RELEASE_NAME) .
