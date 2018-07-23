@@ -72,5 +72,10 @@ endif
 	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
 
+sqitch-%:
+	# examples:
+	# 	make sqitch-add ARGS="001-add_user-gke_sidecar -n 'Add user for GKE sidecar proxy'"
+	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql $* $(ARGS)
+
 # you may create a Makefile-local to override the variables.
 include Makefile-*

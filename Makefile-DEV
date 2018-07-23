@@ -2,7 +2,7 @@
 
 DEV_HELM_INSTALL_FLAGS = --values values-dev.yaml --set docker_image_path=$(DOCKER_HUB_USERNAME)
 
-dev_env: env_kube_local
+dev_env: env_kube_local env_sqitch
 	minikube addons enable --alsologtostderr dashboard
 	minikube addons open dashboard
 
@@ -29,8 +29,3 @@ dev-status:
 
 dev-sqitch-init:
 	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql init $(PROJECT_NAME) --uri $(PROJECT_URL) --engine pg
-
-dev-sqitch-%:
-	# examples:
-	# 	make dev-sqitch-add ARGS="001-add_user-gke_sidecar -n 'Add user for GKE sidecar proxy'"
-	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql $* $(ARGS)
