@@ -1,30 +1,52 @@
 SYSTEM_NAME = $(shell uname -s)
 WITH_MINIKUBE_DOCKER_ENV = eval $$(minikube docker-env)
 
-.PHONY: env_helm env_kubectl env_minikube env_sqitch env_kube_local
+.PHONY: env_brew env_helm env_kubectl env_minikube env_sqitch env_kube_local
 
-env_helm:
-ifeq ($(SYSTEM_NAME), Darwin)
-	brew install kubernetes-helm
+BREW := $(shell command -v brew 2> /dev/null)
+env_brew:
+ifdef BREW
+	@echo brew found at $(BREW)
+else ifeq ($(SYSTEM_NAME), Darwin)
+	/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	brew update
+endif
+BREW = HOMEBREW_NO_AUTO_UPDATE=1 $(shell command -v brew 2> /dev/null)
+
+HELM := $(shell command -v helm 2> /dev/null)
+env_helm: env_brew env_kubectl
+ifdef HELM
+	@echo helm found at $(HELM)
+else ifeq ($(SYSTEM_NAME), Darwin)
+	$(BREW) install kubernetes-helm
 else
 	set -o pipefail; \
 	curl -LO https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
 endif
+HELM = $(shell command -v helm 2> /dev/null)
 
-env_kubectl:
-ifeq ($(SYSTEM_NAME), Darwin)
-	brew install kubernetes-cli
+KUBECTL := $(shell command -v kubectl 2> /dev/null)
+env_kubectl: env_brew
+ifdef KUBECTL
+	@echo kubectl found at $(KUBECTL)
+else ifeq ($(SYSTEM_NAME), Darwin)
+	$(BREW) install kubernetes-cli
 else
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 	chmod +x ./kubectl
 	sudo mv ./kubectl /usr/local/bin/kubectl
 endif
+KUBECTL = $(shell command -v kubectl 2> /dev/null)
 
-env_minikube: env_kubectl
+MINIKUBE := $(shell command -v minikube 2> /dev/null)
+env_minikube: env_kubectl env_brew
 	# docker should be available and working
 	docker images > /dev/null
-ifeq ($(SYSTEM_NAME), Darwin)
-	brew cask install minikube
+ifdef MINIKUBE
+	@echo minikube found at $(MINIKUBE). starting...
+	minikube start --alsologtostderr
+else ifeq ($(SYSTEM_NAME), Darwin)
+	$(BREW) cask install minikube
 	minikube start --alsologtostderr --vm-driver hyperkit
 else
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.1/minikube-linux-amd64
@@ -40,24 +62,30 @@ endif
 	done
 	minikube addons enable kube-dns
 	minikube addons enable ingress
+MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
+SQITCH := $(shell command -v sqitch 2> /dev/null)
 env_sqitch:
-ifeq ($(SYSTEM_NAME), Darwin)
-	# brew tap sqitchers/sqitch
-	# brew install sqitch_pg --without-postgresql --HEAD
-	brew install cpanminus
+ifdef SQITCH
+	@echo sqitch found at $(SQITCH)
+else ifeq ($(SYSTEM_NAME), Darwin)
+	# $(BREW) tap sqitchers/sqitch
+	# $(BREW) install sqitch_pg --without-postgresql --HEAD
+	$(BREW) install cpanminus
 	sudo cpanm -n App::Sqitch DBD::Pg
 	sqitch config --global user.name "$$(git config user.name)"
 	sqitch config --global user.email "$$(git config user.email)"
 else
 	@echo env sqitch can only been installed on macOS
+	exit 1
 endif
+SQITCH = $(shell command -v sqitch 2> /dev/null)
 
 env_kube_local: env_kubectl env_minikube env_helm
 	# verify kubernetes is ready for use
 	set -o pipefail; \
-	kubectl cluster-info --request-timeout=10 2>/dev/null | head -n 1
+	$(KUBECTL) cluster-info --request-timeout=10 2>/dev/null | head -n 1
 	# install helm
-	helm init --wait
+	$(HELM) init --upgrade --wait
 	# verify helm installed
-	helm list
+	$(HELM) list
