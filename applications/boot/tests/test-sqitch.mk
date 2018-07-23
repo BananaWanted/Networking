@@ -1,0 +1,1 @@
+# TODO test sqitch by running full deploy + verify + revert cycles

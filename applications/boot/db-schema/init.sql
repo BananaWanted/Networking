@@ -1,0 +1,2 @@
+-- create user sqitch, with admin privillege
+-- create database default, and give sqitch ownership
