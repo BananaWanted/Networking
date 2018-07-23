@@ -1,17 +1,30 @@
-# control the in-container environment
-# set this flag to true to use the testing image.
-# more details:
-#   For each CI build, 2 different images are pushed to the registry, one is for production, another for testing.
-#   The prod image is basing on a minimized base image, usually alpine based or from scratch. Any non-necessary
-#   files like tests / scripts are not included in this image.
-#   The testing image is built for easy to use, thus usually dabian/ubuntu based. It not only
-#   includes the full source files but also installs testing dependencies such as ipdb, pytest in python apps.
-#   Another additional feature in the testing image is, the container command is wrapped in `bash`. Thus attaching to 
-#   a running container and perform interactive debugging is possible.
+# with testing=true:
+#   - deploy test image
+#   - image includes testing frameworks (ipdb, pytest)
+#   - image have abality to run test cases
+#   - deploy & connect to a test db
+# with testing=false:
+#   - deploy prod image
+#   - test cases are removed from images
+#   - connect to prod db
 testing: false
-docker_image_path: library  # path prefix for docker images, override this value in Makefile
-tlsSecret: tls-secret   # secret storing the tls certs for ingress
-staticIP: static-ip     # static-ip name (in gce) for ingress
+
+# Some values require override from main Makefile with values specified through Environment Variables.
+# The name of the variables are documented as:  ENV: <Variable Name>
+
+dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_HUB_USERNAME
+tlsSecret: tls-secret     # secret storing the tls certs for ingress.
+staticIP: static-ip       # static-ip name (in gce) for ingress
+
+gcloud-sqlproxy:
+  existingSecret: database-secret  # secret for connecting to Cloud SQL database
+  existingSecretKey: credential
+  cloudsql:
+    instances:
+    - project: project    # ENV: GCP_PROJECT
+      region: retion      # ENV: GCP_DB_REGION
+      instance: instance  # ENV: GCP_DB_INSTANCE
+      port: 5432
 
 appsConfig:
   dns:
@@ -34,16 +47,3 @@ appsConfig:
     ingress:
     - path: "/generate_204"
       port: 80 # if absent the first port in tcpPorts is used
-
-# ingress:
-#   enabled: false
-#   annotations: {}
-#     # kubernetes.io/ingress.class: nginx
-#     # kubernetes.io/tls-acme: "true"
-#   path: /
-#   hosts:
-#     - chart-example.local
-#   tls: []
-#   #  - secretName: chart-example-tls
-#   #    hosts:
-#   #      - chart-example.local
