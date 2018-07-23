@@ -6,10 +6,9 @@ SHELL = bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
-RELEASE_NAME ?= default-release
+RELEASE_NAME ?= release-production-main
 DOCKER_HUB_USERNAME ?= library
 DOCKER_HUB_PASSWORD ?=
-DOCKER_BUILD_OPTIONS ?=
 DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
 
@@ -48,8 +47,8 @@ $(APPS) $(BASE_APPS):
 	fi
 
 docker-build-app-%:
-	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
-	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
 
 docker-retag-app-%:
 	docker tag $(DOCKER_HUB_USERNAME)/$*:latest $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
@@ -75,6 +74,7 @@ endif
 sqitch-%:
 	# examples:
 	# 	make sqitch-add ARGS="001-add_user-gke_sidecar -n 'Add user for GKE sidecar proxy'"
+	# 	make sqitch-deploy ARGS="--verify"
 	docker run --rm -v `realpath .`/applications/boot/db-schema:/src docteurklein/sqitch:pgsql $* $(ARGS)
 
 # you may create a Makefile-local to override the variables.
