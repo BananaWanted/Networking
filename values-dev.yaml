@@ -1,4 +1,15 @@
 testing: true
+not-testing: false
+
+db-postgres-test:
+  postgresUser: postgres
+  postgresPassword: postgres
+  postgresConfig:
+    logConnections: yes
+    logHostname: yes
+    logStatement: all
+  persistence:
+    enabled: true
 
 appsConfig:
   dns:

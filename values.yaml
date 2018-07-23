@@ -8,23 +8,37 @@
 #   - test cases are removed from images
 #   - connect to prod db
 testing: false
+not-testing: true   # workaround the issue that currently no way to have logic not in requirements.yaml conditions
 
 # Some values require override from main Makefile with values specified through Environment Variables.
 # The name of the variables are documented as:  ENV: <Variable Name>
 
 dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_HUB_USERNAME
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
+databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database
 staticIP: static-ip       # static-ip name (in gce) for ingress
 
-gcloud-sqlproxy:
-  existingSecret: database-secret  # secret for connecting to Cloud SQL database
-  existingSecretKey: credential
+db-postgres:
+  existingSecret: *databaseSecret
+  existingSecretKey: instance-credential
   cloudsql:
     instances:
     - project: project    # ENV: GCP_PROJECT
       region: retion      # ENV: GCP_DB_REGION
       instance: instance  # ENV: GCP_DB_INSTANCE
       port: 5432
+
+db-postgres-test:
+  postgresUser: postgres
+  postgresPassword: postgres
+  postgresConfig:
+    logConnections: yes
+    logHostname: yes
+    logStatement: all
+  persistence:
+    enabled: false
+  service:
+    port: 5432
 
 appsConfig:
   dns:
