@@ -1,5 +1,8 @@
-ci: ci_prepare_env ci_build ci_run ci_after_success
+CI_HELM_COMMON_FLAGS ?= --wait \
+						--set dockerRegistry=$(DOCKER_HUB_USERNAME),buildTag=$(BUILD_TAG) \
+						--set testing=true,notTesting=false
 
+ci: ci_prepare_env ci_build ci_run ci_after_success
 
 ci_prepare_env: ci_install_helm ci_install_minikube ci_git_login ci_docker_login env_kube_local
 
@@ -7,7 +10,7 @@ ci_build: all
 
 ci_run:
 	$(HELM) dependency update
-	$(HELM) install --name $(RELEASE_NAME) --wait --set docker_image_path=$(DOCKER_HUB_USERNAME),testing=true,notTesting=false,buildTag=$(BUILD_TAG) .
+	$(HELM) install --name $(RELEASE_NAME) .
 	$(HELM) status $(RELEASE_NAME)
 
 ci_after_success: ci_docker_push_images ci_tag_the_commit

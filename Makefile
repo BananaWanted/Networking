@@ -71,6 +71,9 @@ endif
 	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
 	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
 
+sleep-%:
+	sleep $*
+
 sqitch-%:
 	# examples:
 	# 	make sqitch-add ARGS=""
