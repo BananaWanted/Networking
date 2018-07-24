@@ -12,11 +12,11 @@ from sqlalchemy.orm import sessionmaker, Session
 
 def setup_sqlalchemy(app: Sanic):
     app.engine = create_engine(
-        'postgresql://{user}:{password}@{host}/{database}'.format(
+        'postgresql://{user}:{password}@{host}:{port}'.format(
             host=app.config.DB_HOST,
-            database=app.config.DB_NAME,
-            user=app.config.DB_USER,
-            password=app.config.DB_PASS,
+            port=app.config.DB_PORT,
+            user=app.config.DB_USERNAME,
+            password=app.config.DB_PASSWORD,
         )
     )
     app.session_class = sessionmaker(app.engine)

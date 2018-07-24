@@ -8,6 +8,7 @@ metadata:
     {{- include "Networking.App.Label" (list $app $) | indent 4 }}
 spec:
   activeDeadlineSeconds: {{ $appConfig.timeout | default 300 }}
+  backoffLimit: {{ $appConfig.maxRetrys | default 6 }}
   template:
     metadata:
     labels:

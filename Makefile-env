@@ -100,3 +100,8 @@ env_kube_local: env_kubectl env_minikube env_helm
 	$(HELM) init --upgrade --wait
 	# verify helm installed
 	until $(HELM) list; do sleep 2; done
+
+env-minikube-destroy:
+	@echo destroy local minikube cluster, confirm?
+	@read _
+	$(MINIKUBE) delete 

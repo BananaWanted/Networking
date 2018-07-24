@@ -4,7 +4,7 @@ DEV_HELM_COMMON_FLAGS ?= --wait --debug \
 						--set postgresTesting.persistence.enabled=true \
 						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
 
-dev_env: env_kube_local env_sqitch
+dev-env: env_kube_local env_sqitch
 	$(MINIKUBE) addons enable dashboard
 	$(MINIKUBE) addons open dashboard
 
@@ -12,7 +12,7 @@ dev:
 	# make sure you have ran `make dev_env` first
 	eval $$(minikube docker-env) && $(MAKE) all
 
-dev-image-%:
+dev-app-%:
 	# make sure you have ran `make dev_env` first
 	eval $$(minikube docker-env) && $(MAKE) $*
 

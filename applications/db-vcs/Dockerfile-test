@@ -2,7 +2,7 @@ ARG DOCKER_HUB_USERNAME
 ARG BUILD_TAG
 FROM ${DOCKER_HUB_USERNAME}/sqitch:${BUILD_TAG}-test
 
-COPY sqitch /sqitch
-WORKDIR /sqitch
+COPY sqitch .
+COPY waiting_for_db.sh /waiting_for_db.sh
 
-CMD /usr/local/bin/sqitch rebase --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}
+CMD /waiting_for_db.sh && sqitch rebase --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT} || sqitch deploy --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}
