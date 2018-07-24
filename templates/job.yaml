@@ -13,13 +13,13 @@ spec:
     labels:
       {{- include "Networking.App.Label" (list $app $) | indent 8 }}
     spec:
+      restartPolicy: Never
       containers:
         - name: {{ include "Networking.App.DNSName" (list $app $) }}
           image:  {{ $.Values.dockerRegistry -}} /
                   {{- list $app $.Values.buildTag | join ":" }}
                   {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
-          restartPolicy: Never
           {{- if $appConfig.databaseEnabled }}
           env:
             {{- if $.Values.testing }}

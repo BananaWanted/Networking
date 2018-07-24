@@ -12,7 +12,7 @@ dev:
 	# make sure you have ran `make dev_env` first
 	eval $$(minikube docker-env) && $(MAKE) all
 
-dev-%:
+dev-image-%:
 	# make sure you have ran `make dev_env` first
 	eval $$(minikube docker-env) && $(MAKE) $*
 

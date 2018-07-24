@@ -54,7 +54,6 @@ appConfigs:
     - path: "/dns"
     - path: "/dns/*"
     databaseEnabled: true
-    dependsOn: []
   misc:
     type: service
     pullPolicy: IfNotPresent
@@ -66,7 +65,6 @@ appConfigs:
     - path: "/generate_204"
       port: 80 # if absent the first port in tcpPorts is used
     databaseEnabled: false
-    dependsOn: []
   db-vcs:
     type: task
     pullPolicy: IfNotPresent
