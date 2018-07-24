@@ -80,5 +80,8 @@ sqitch-%:
 	# 	make sqitch-deploy
 	docker run --rm -v `realpath .`/applications/db-vcs/sqitch:/src docteurklein/sqitch:pgsql $* $(ARGS)
 
+noerror-%:
+	-$(MAKE) $*
+
 # you may create a Makefile-local to override the variables.
 include Makefile-*

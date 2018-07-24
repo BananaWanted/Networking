@@ -1,9 +1,9 @@
-{{- range $app, $appConfig := .Values.appsConfig }}
+{{- range $app, $appConfig := .Values.appConfigs }}
 {{- if and $appConfig.serviceType (or $appConfig.tcpPorts $appConfig.udpPorts) }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ list $.Release.Name $app | join "-" }}
+  name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
   labels:
     {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
 spec:

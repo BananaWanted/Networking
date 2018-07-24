@@ -1,20 +1,17 @@
 {{- range $app, $appConfig := .Values.appConfigs }}
-{{- if eq (default $appConfig.type "unknown") "service" }}
-apiVersion: apps/v1
-kind: Deployment
+{{- if eq (default "unknown" $appConfig.type) "task" }}
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
   labels:
     {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
 spec:
-  replicas: {{ $appConfig.replicas }}
-  selector:
-    matchLabels:
-      {{- include "Networking.App.Label" (list $app $appConfig $) | indent 6 }}
+  activeDeadlineSeconds: {{ $appConfig.timeout | default 300 }}
   template:
     metadata:
-      labels:
-        {{- include "Networking.App.Label" (list $app $appConfig $) | indent 8 }}
+    labels:
+      {{- include "Networking.App.Label" (list $app $appConfig $) | indent 8 }}
     spec:
       containers:
         - name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
@@ -22,17 +19,7 @@ spec:
                   {{- list $app $.Values.buildTag | join ":" }}
                   {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
-          {{- if or $appConfig.tcpPorts $appConfig.udpPorts }}
-          ports:
-            {{- range $i, $tcpPort := $appConfig.tcpPorts }}
-            - containerPort: {{ $tcpPort }}
-              protocol: TCP
-            {{- end }}
-            {{- range $i, $udpPort := $appConfig.udpPorts }}
-            - containerPort: {{ $udpPort }}
-              protocol: UDP
-            {{- end }}
-          {{- end }}
+          restartPolicy: Never
           {{- if $appConfig.databaseEnabled }}
           env:
             {{- if $.Values.testing }}

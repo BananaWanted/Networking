@@ -42,8 +42,9 @@ postgresTesting:
   service:
     port: 5432
 
-appsConfig:
+appConfigs:
   dns:
+    kind: service
     pullPolicy: IfNotPresent
     replicas: 3
     serviceType: ClusterIP
@@ -53,7 +54,9 @@ appsConfig:
     - path: "/dns"
     - path: "/dns/*"
     databaseEnabled: true
+    dependsOn: []
   misc:
+    kind: service
     pullPolicy: IfNotPresent
     replicas: 3
     serviceType: ClusterIP
@@ -63,3 +66,8 @@ appsConfig:
     - path: "/generate_204"
       port: 80 # if absent the first port in tcpPorts is used
     databaseEnabled: false
+    dependsOn: []
+  db-vcs:
+    kind: task
+    pullPolicy: IfNotPresent
+    databaseEnabled: true
