@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
+  name: {{ include "Networking.App.DNSName" (list $app $) }}
   labels:
-    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
+    {{- include "Networking.App.Label" (list $app $) | indent 4 }}
 spec:
   type: {{ $appConfig.serviceType }}
   ports:
@@ -18,7 +18,7 @@ spec:
     protocol: UDP
   {{- end }}
   selector:
-    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
+    {{- include "Networking.App.Label" (list $app $) | indent 4 }}
 ---
 {{- end}}
 {{- end }}

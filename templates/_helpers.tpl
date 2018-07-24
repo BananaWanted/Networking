@@ -1,14 +1,14 @@
-{{- define "Networking.App.DNSName" }} {{- /* params: app: String, appConfig: map, globalContext: map */ -}}
+{{- define "Networking.App.DNSName" }} {{- /* params: app: String, globalContext: map */ -}}
 {{- $app := index . 0 }}
-{{- $appConfig := index . 1 }}
-{{- $global := index . 2 }}
+{{- $global := index . 1 }}
+{{- $appConfig := index $global.Values.appConfigs $app }}
 {{- list $global.Release.Name (default $app $appConfig.nameOverride) | join "-" }}
 {{- end }}
 
-{{- define "Networking.App.Label" -}} {{- /* params: app: String, appConfig: map, globalContext: map */ -}}
+{{- define "Networking.App.Label" -}} {{- /* params: app: String, globalContext: map */ -}}
 {{- $app := index . 0 }}
-{{- $appConfig := index . 1 }}
-{{- $global := index . 2 }}
+{{- $global := index . 1 }}
+{{- $appConfig := index $global.Values.appConfigs $app }}
 {{- $chart := list $global.Chart.Name $global.Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 app: {{ $app }}
 chart: {{ $chart }}

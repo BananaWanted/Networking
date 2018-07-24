@@ -25,7 +25,7 @@ spec:
             {{- range $i, $ingressConfig:= $appConfig.ingress }}
       - path: {{ $ingressConfig.path | quote }}
         backend:
-          serviceName: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
+          serviceName: {{ include "Networking.App.DNSName" (list $app $) }}
           servicePort: {{ $ingressConfig.port | default (index $appConfig.tcpPorts 0) }}
             {{ end -}}
           {{- end -}}

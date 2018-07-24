@@ -44,7 +44,7 @@ postgresTesting:
 
 appConfigs:
   dns:
-    kind: service
+    type: service
     pullPolicy: IfNotPresent
     replicas: 3
     serviceType: ClusterIP
@@ -56,7 +56,7 @@ appConfigs:
     databaseEnabled: true
     dependsOn: []
   misc:
-    kind: service
+    type: service
     pullPolicy: IfNotPresent
     replicas: 3
     serviceType: ClusterIP
@@ -68,6 +68,6 @@ appConfigs:
     databaseEnabled: false
     dependsOn: []
   db-vcs:
-    kind: task
+    type: task
     pullPolicy: IfNotPresent
     databaseEnabled: true

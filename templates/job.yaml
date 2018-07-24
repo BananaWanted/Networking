@@ -3,18 +3,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
+  name: {{ include "Networking.App.DNSName" (list $app $) }}
   labels:
-    {{- include "Networking.App.Label" (list $app $appConfig $) | indent 4 }}
+    {{- include "Networking.App.Label" (list $app $) | indent 4 }}
 spec:
   activeDeadlineSeconds: {{ $appConfig.timeout | default 300 }}
   template:
     metadata:
     labels:
-      {{- include "Networking.App.Label" (list $app $appConfig $) | indent 8 }}
+      {{- include "Networking.App.Label" (list $app $) | indent 8 }}
     spec:
       containers:
-        - name: {{ include "Networking.App.DNSName" (list $app $appConfig $) }}
+        - name: {{ include "Networking.App.DNSName" (list $app $) }}
           image:  {{ $.Values.dockerRegistry -}} /
                   {{- list $app $.Values.buildTag | join ":" }}
                   {{- if $.Values.testing -}} -test {{- end }}
