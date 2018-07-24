@@ -30,6 +30,8 @@ dev-purge:
 
 dev-purge-all:
 	$(HELM) list -a -q | tee | xargs $(HELM) delete --purge
+	sleep 5
+	eval $$(minikube docker-env) && docker rmi $$(docker images -q)
 
 dev-reinstall: noerror-dev-purge sleep-5 dev-install
 
