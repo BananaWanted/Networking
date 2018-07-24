@@ -4,5 +4,5 @@ Alpine based Sqitch build.
 
 ### Image Size:
 
-compressed: 
-uncompressed: 
+compressed: 18MB
+uncompressed: 79MB

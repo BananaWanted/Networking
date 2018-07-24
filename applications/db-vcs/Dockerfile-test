@@ -1,0 +1,8 @@
+ARG DOCKER_HUB_USERNAME
+ARG BUILD_TAG
+FROM ${DOCKER_HUB_USERNAME}/sqitch:${BUILD_TAG}-test
+
+COPY sqitch /sqitch
+WORKDIR /sqitch
+
+CMD /usr/local/bin/sqitch rebase --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}

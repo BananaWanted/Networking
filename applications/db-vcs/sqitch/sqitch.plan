@@ -1,5 +1,3 @@
 %syntax-version=1.0.0
 %project=Networking
 %uri=https://github.com/BananaWanted/Networking
-
-001-add_user-gke_sidecar 2018-07-22T14:27:10Z root <root@b4737ff47983> # Add user for GKE sidecar proxy
