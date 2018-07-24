@@ -1,6 +1,6 @@
 FROM alpine
 
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8 TERM=dumb
 
 RUN apk update \
     && apk --no-cache add perl perl-dbi perl-dbd-pg postgresql-client ca-certificates \
