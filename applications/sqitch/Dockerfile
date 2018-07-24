@@ -1,5 +1,7 @@
 FROM alpine
 
+ENV LANG C.UTF-8
+
 RUN apk update \
     && apk --no-cache add perl perl-dbi perl-dbd-pg postgresql-client ca-certificates \
     && apk --no-cache add --virtual build-dependencies perl-dev perl-app-cpanminus postgresql-dev gcc libc-dev make curl tar wget \
