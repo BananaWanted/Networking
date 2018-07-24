@@ -6,7 +6,7 @@ SHELL = bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
-RELEASE_NAME ?= release-production-main
+RELEASE_NAME ?= release-prod
 DOCKER_HUB_USERNAME ?= library
 DOCKER_HUB_PASSWORD ?=
 DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)

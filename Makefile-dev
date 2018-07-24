@@ -15,6 +15,7 @@ dev-%:
 	eval $$(minikube docker-env) && $(MAKE) $*
 
 dev-install:
+	$(HELM) dependency update
 	$(HELM) install $(DEV_HELM_INSTALL_FLAGS) --name $(RELEASE_NAME) .
 
 dev-install-dryrun:
