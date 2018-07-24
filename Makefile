@@ -1,6 +1,6 @@
 PROJECT_NAME = Networking
 PROJECT_URL = https://github.com/BananaWanted/Networking
-APPS = dns misc
+APPS = dns misc db-vcs
 BASE_APPS = sanic sqitch
 SHELL = bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
@@ -74,11 +74,8 @@ endif
 sleep-%:
 	sleep $*
 
-sqitch-%:
-	# examples:
-	# 	make sqitch-add ARGS=""
-	# 	make sqitch-deploy
-	docker run --rm -v `realpath .`/applications/db-vcs/sqitch:/src docteurklein/sqitch:pgsql $* $(ARGS)
+sqitch-%: env_sqitch
+	$(SQITCH) $* $(ARGS)
 
 noerror-%:
 	-$(MAKE) $*

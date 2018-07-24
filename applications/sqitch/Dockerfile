@@ -6,3 +6,5 @@ RUN apk update \
     && cpanm -n App::Sqitch DBD::Pg \
     && apk del --purge build-dependencies \
     && rm -rf ./cpanm /root/.cpanm /usr/src/perl /usr/local/share/man
+
+WORKDIR /sqitch

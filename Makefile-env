@@ -63,7 +63,7 @@ endif
 	minikube addons enable ingress
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
-SQITCH := $(shell command -v sqitch 2> /dev/null)
+SQITCH := $(shell command -v sqitch 2> /dev/null || docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) 2> /dev/null)
 env_sqitch:
 ifdef SQITCH
 	@echo sqitch found at $(SQITCH)
@@ -75,10 +75,13 @@ else ifeq ($(SYSTEM_NAME), Darwin)
 	sqitch config --global user.name "$$(git config user.name)"
 	sqitch config --global user.email "$$(git config user.email)"
 else
-	@echo env sqitch can only been installed on macOS
-	exit 1
+	@echo Sqitch installation can only been performed on macOS. Using docker image $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) as alternative.
+	@echo You may run '`make sqitch`' to build the image.
+	docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) > /dev/null
 endif
-SQITCH = $(shell command -v sqitch 2> /dev/null)
+SQITCH = $(shell \
+		CMD=`command -v sqitch 2> /dev/null` && echo $$CMD --top-dir applications/db-vcs/sqitch/ \
+		|| docker run --rm -v `realpath .`/applications/db-vcs/sqitch:/sqitch $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) sqitch)
 
 env_kube_local: env_kubectl env_minikube env_helm
 	# verify kubernetes is ready for use
