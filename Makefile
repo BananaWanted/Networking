@@ -1,7 +1,7 @@
 PROJECT_NAME = Networking
 PROJECT_URL = https://github.com/BananaWanted/Networking
 APPS = dns misc
-BASE_APPS = sanic
+BASE_APPS = sanic sqitch
 SHELL = bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
