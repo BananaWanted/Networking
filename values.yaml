@@ -15,12 +15,12 @@ notTesting: true   # workaround the issue that currently no way to have logic no
 
 dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_REGISTRY
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
-tlsSecret: tls-secret     # secret storing the tls certs for ingress.
-databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database
-staticIP: static-ip       # static-ip name (in gce) for ingress
+tlsSecret: tls-secret     # secret storing the tls certs for ingress. ENV: PROD_K8S_SECRET_TLS
+databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database. ENV: PROD_K8S_SECRET_DATABASE
+staticIP: static-ip       # static-ip name (in gce) for ingress. ENV: PROD_GCP_STATIC_IP
 
 postgres:
-  existingSecret: *databaseSecret
+  existingSecret: *databaseSecret   # ENV: PROD_K8S_SECRET_DATABASE
   existingSecretKey: instance-credential
   cloudsql:
     instances:
