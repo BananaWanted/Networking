@@ -51,8 +51,7 @@ appConfigs:
     tcpPorts: [80]
     udpPorts: []
     ingress:
-    - path: "/dns"
-    - path: "/dns/*"
+    - path: "/ddns/"
     databaseEnabled: true
     env:
       DDNS_ZONE: local
