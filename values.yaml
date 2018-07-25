@@ -71,4 +71,6 @@ appConfigs:
     type: task
     pullPolicy: IfNotPresent
     databaseEnabled: true
-    maxRetrys: 2
+    maxRetrys: 1
+    env:
+      TZ: UTC
