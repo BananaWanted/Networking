@@ -1,33 +1,32 @@
-CI_HELM_COMMON_FLAGS ?= --wait \
-						--set dockerRegistry=$(DOCKER_HUB_USERNAME),buildTag=$(BUILD_TAG) \
-						--set testing=true,notTesting=false
+# Everything defined in this file have prefix CI_ or (ci-)
+CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--wait --set testing=true,notTesting=false
 
-ci: ci_prepare_env ci_build ci_run ci_after_success
+ci: ci-prepare-env ci-build ci-run ci-after-success
 
-ci_prepare_env: ci_install_helm ci_install_minikube ci_git_login ci_docker_login env_kube_local
+ci-prepare-env: ci-install-helm ci-install-minikube ci-git-login ci-docker-login env-kube-local
 
-ci_build: all
+ci-build: all
 
-ci_run:
+ci-run:
 	$(HELM) dependency update
-	$(HELM) install --name $(RELEASE_NAME) .
-	$(HELM) status $(RELEASE_NAME)
+	$(HELM) install --name $(HELM_RELEASE_NAME) .
+	$(HELM) status $(HELM_RELEASE_NAME)
 
-ci_after_success: ci_docker_push_images ci_tag_the_commit
+ci-after-success: ci-docker-push-images ci-tag-the-commit
 
-
-ci_git_set_username_travis:
+ci-git-set-username-travis:
 	git config user.email "builds@travis-ci.org"
 	git config user.name "Travis CI"
 
-ci_git_login:
+ci-git-login:
 	@git remote set-url origin $(shell git remote get-url origin | sed "s#https://#https://$(GITHUB_TOKEN)@#g")
 
-ci_docker_login:
-	docker login -u $(DOCKER_HUB_USERNAME) -p $(DOCKER_HUB_PASSWORD)
+ci-docker-login:
+	docker login -u $(DOCKER_REGISTRY) -p $(DOCKER_PASSWORD)
 
-ci_docker_push_images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
+ci-docker-push-images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
 
-ci_tag_the_commit:
+ci-tag-the-commit:
 	git tag $(BUILD_TAG)
 	git push origin $(BUILD_TAG)

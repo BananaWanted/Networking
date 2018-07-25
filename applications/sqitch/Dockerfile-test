@@ -1,5 +1,5 @@
-ARG DOCKER_HUB_USERNAME
+ARG DOCKER_REGISTRY
 ARG BUILD_TAG
-FROM ${DOCKER_HUB_USERNAME}/sqitch:${BUILD_TAG}
+FROM ${DOCKER_REGISTRY}/sqitch:${BUILD_TAG}
 
 # Currently nothing to do with this image. Simple retag to non-testing image.

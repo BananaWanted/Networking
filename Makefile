@@ -1,16 +1,15 @@
-PROJECT_NAME = Networking
-PROJECT_URL = https://github.com/BananaWanted/Networking
-APPS = dns misc db-vcs
-BASE_APPS = sanic sqitch
-SHELL = bash
+APPS := dns misc db-vcs
+BASE_APPS := sanic sqitch
+SHELL := bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
-RELEASE_NAME ?= release-prod
-DOCKER_HUB_USERNAME ?= library
-DOCKER_HUB_PASSWORD ?=
-DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)
+HELM_RELEASE_NAME ?= release-prod
+DOCKER_REGISTRY ?= library
+DOCKER_PASSWORD ?=
+DOCKER_BUILD_ARGS ?= --build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
+HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG)
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 
@@ -35,7 +34,7 @@ $(APPS) $(BASE_APPS):
 		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
 			app_modified=yes; \
 		else \
-			if ! ( docker pull $(DOCKER_HUB_USERNAME)/$@:latest && docker pull $(DOCKER_HUB_USERNAME)/$@:latest-test ); then \
+			if ! ( docker pull $(DOCKER_REGISTRY)/$@:latest && docker pull $(DOCKER_REGISTRY)/$@:latest-test ); then \
 				app_not_exists=yes; \
 			fi; \
 		fi; \
@@ -47,34 +46,34 @@ $(APPS) $(BASE_APPS):
 	fi
 
 docker-build-app-%:
-	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
-	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
 
 docker-retag-app-%:
-	docker tag $(DOCKER_HUB_USERNAME)/$*:latest $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker tag $(DOCKER_HUB_USERNAME)/$*:latest-test $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
+	docker tag $(DOCKER_REGISTRY)/$*:latest $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker tag $(DOCKER_REGISTRY)/$*:latest-test $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 
 docker-push-app-%:
-	@echo pushing $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
+	@echo pushing $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 ifeq ($(IS_PULL_REQUEST), false)
 	# override latest for master builds
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:latest
-	docker push $(DOCKER_HUB_USERNAME)/$*:latest
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:latest-test
-	docker push $(DOCKER_HUB_USERNAME)/$*:latest-test
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) $(DOCKER_REGISTRY)/$*:latest
+	docker push $(DOCKER_REGISTRY)/$*:latest
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:latest-test
+	docker push $(DOCKER_REGISTRY)/$*:latest-test
 endif
 	# tag branch name for all builds
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
+	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
+	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 
 sleep-%:
 	sleep $*
 
-sqitch-%: env_sqitch
+sqitch-%: env-sqitch
 	$(SQITCH) $* $(ARGS)
 
 noerror-%:

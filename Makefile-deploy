@@ -1,5 +1,26 @@
-deploy-secret-db:
+# Everything defined in this file have prefix PROD_ or (prod-)
+# This contains everything to config production environment.
+# Credentials are passed by setting environment variables.
+
+PROD_GCP_KEY_FILE ?=
+PROD_GCP_PROJECT ?=
+
+PROD_GCP_DB_REGION ?=
+PROD_GCP_DB_INSTANCE ?=
+PROD_GCP_DB_USERNAME ?=
+PROD_GCP_DB_PASSWORD ?=
+
+PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--set cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
+						--set cloudsql.instances[0].project="$(PROD_GCP_PROJECT)" \
+						--set cloudsql.instances[0].region="$(PROD_GCP_DB_REGION)"
+
+prod-secret-database:
 	kubectl create secret generic database-secret \
-		--from-file=instance-credential="$(FILE)"
-		--from-literal=username="$(USERNAME)" \
-		--from-literal=password="$(PASSWORD)"
+		--from-file=instance-credential="$(PROD_GCP_KEY_FILE)"
+		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
+		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
+
+prod-secret-tls:
+
+prod-static-ip:

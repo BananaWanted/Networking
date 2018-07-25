@@ -1,23 +1,26 @@
-SYSTEM_NAME = $(shell uname -s)
-WITH_MINIKUBE_DOCKER_ENV = eval $$(minikube docker-env)
-
-.PHONY: env_brew env_helm env_kubectl env_minikube env_sqitch env_kube_local
+# Everything defined in this file have prefix ENV_ or (env-)
+# Except CLI command names such as $(HELM) $(MINIKUBE) ...
+# Note in any condition Docker client should be available in PATH. This makefile won't take care of Docker.
+ENV_OS_NAME ?= $(shell uname -s)
 
 BREW := $(shell command -v brew 2> /dev/null)
-env_brew:
+env-brew:
 ifdef BREW
-	@echo brew found at $(BREW)
-else ifeq ($(SYSTEM_NAME), Darwin)
+	@echo brew ... check
+	$(BREW) update
+else ifeq ($(ENV_OS_NAME), Darwin)
 	/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	brew update
+	$(BREW) update
+else
+	@echo not macOS, skipping Homebrew.
 endif
 BREW = HOMEBREW_NO_AUTO_UPDATE=1 $(shell command -v brew 2> /dev/null)
 
 HELM := $(shell command -v helm 2> /dev/null)
-env_helm: env_brew env_kubectl
+env-helm: env-brew env-kubectl
 ifdef HELM
-	@echo helm found at $(HELM)
-else ifeq ($(SYSTEM_NAME), Darwin)
+	@echo helm ... check
+else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) install kubernetes-helm
 else
 	set -o pipefail; \
@@ -26,10 +29,10 @@ endif
 HELM = $(shell command -v helm 2> /dev/null)
 
 KUBECTL := $(shell command -v kubectl 2> /dev/null)
-env_kubectl: env_brew
+env-kubectl: env-brew
 ifdef KUBECTL
-	@echo kubectl found at $(KUBECTL)
-else ifeq ($(SYSTEM_NAME), Darwin)
+	@echo kubectl ... check
+else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) install kubernetes-cli
 else
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
@@ -39,61 +42,44 @@ endif
 KUBECTL = $(shell command -v kubectl 2> /dev/null)
 
 MINIKUBE := $(shell command -v minikube 2> /dev/null)
-env_minikube: env_kubectl env_brew
-	# docker should be available and working
+env-minikube: env-kubectl env-brew
 	docker images > /dev/null
 ifdef MINIKUBE
-	@echo minikube found at $(MINIKUBE). starting...
-	minikube status || minikube start --alsologtostderr
-else ifeq ($(SYSTEM_NAME), Darwin)
+	@echo minikube ... check
+	$(MINIKUBE) status || $(MINIKUBE) start
+else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) cask install minikube
-	minikube start --alsologtostderr --vm-driver hyperkit
+	$(MINIKUBE) config set kubernetes-version v1.11.1
+	$(MINIKUBE) config set vm-driver hyperkit
+	$(MINIKUBE) start
 else
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.1/minikube-linux-amd64
 	chmod +x minikube
 	sudo mv minikube /usr/local/bin/
-	sudo minikube start --alsologtostderr --vm-driver=none
-	minikube update-context
+	$(MINIKUBE) config set kubernetes-version v1.11.1
+	$(MINIKUBE) config set vm-driver none
+	$(MINIKUBE) start
+	$(MINIKUBE) update-context
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
-	until kubectl get nodes -o jsonpath="$$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 2; done
-	minikube status
-	minikube addons enable kube-dns
-	minikube addons enable ingress
+	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 2; done
+	$(MINIKUBE) status
+	$(MINIKUBE) addons enable kube-dns
+	$(MINIKUBE) addons enable ingress
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
-# SQITCH := $(shell command -v sqitch 2> /dev/null || docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) 2> /dev/null)
-# env_sqitch:
-# ifdef SQITCH
-# 	@echo sqitch found at $(SQITCH)
-# else ifeq ($(SYSTEM_NAME), Darwin)
-# 	# $(BREW) tap sqitchers/sqitch
-# 	# $(BREW) install sqitch_pg --without-postgresql --HEAD
-# 	$(BREW) install cpanminus
-# 	sudo cpanm -n App::Sqitch DBD::Pg
-# 	sqitch config --global user.name "$$(git config user.name)"
-# 	sqitch config --global user.email "$$(git config user.email)"
-# else
-# 	@echo Sqitch installation can only been performed on macOS. Using docker image $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) as alternative.
-# 	@echo You may run '`make sqitch`' to build the image.
-# 	docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) > /dev/null
-# endif
-# SQITCH = $(shell \
-# 		CMD=`command -v sqitch 2> /dev/null` && echo $$CMD --top-dir applications/db-vcs/sqitch/ \
-# 		|| docker run --rm -v `realpath .`/applications/db-vcs/sqitch:/sqitch $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) sqitch)
-
-SQITCH := $(shell docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) 2> /dev/null)
-env_sqitch:
+SQITCH := $(shell docker image inspect $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) 2> /dev/null)
+env-sqitch:
 ifdef SQITCH
-	@echo sqitch found at $(SQITCH)
+	@echo sqitch ... check
 else
 	$(MAKE) sqitch
-	docker image inspect $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) > /dev/null
+	docker image inspect $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) > /dev/null
 endif
-SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_HUB_USERNAME)/sqitch:$(BUILD_TAG) sqitch
+SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
 
-env_kube_local: env_kubectl env_minikube env_helm
+env-kubernetes: env-kubectl env-minikube env-helm
 	# verify kubernetes is ready for use
 	$(KUBECTL) cluster-info --request-timeout=10
 	# install helm
@@ -101,7 +87,7 @@ env_kube_local: env_kubectl env_minikube env_helm
 	# verify helm installed
 	until $(HELM) list; do sleep 2; done
 
-env-minikube-destroy:
-	@echo destroy local minikube cluster, confirm?
+env-destroy-minikube:
+	@echo destroying minikube cluster, press enter to confirm...
 	@read _
 	$(MINIKUBE) delete 

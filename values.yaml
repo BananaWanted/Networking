@@ -13,7 +13,7 @@ notTesting: true   # workaround the issue that currently no way to have logic no
 # Some values require override from main Makefile with values specified through Environment Variables.
 # The name of the variables are documented as:  ENV: <Variable Name>
 
-dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_HUB_USERNAME
+dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_REGISTRY
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
 databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database
@@ -24,9 +24,9 @@ postgres:
   existingSecretKey: instance-credential
   cloudsql:
     instances:
-    - project: project    # ENV: GCP_PROJECT
-      region: retion      # ENV: GCP_DB_REGION
-      instance: instance  # ENV: GCP_DB_INSTANCE
+    - project: project    # ENV: PROD_GCP_PROJECT
+      region: retion      # ENV: PROD_GCP_DB_REGION
+      instance: instance  # ENV: PROD_GCP_DB_INSTANCE
       port: 5432
 
 postgresTesting:
@@ -38,7 +38,7 @@ postgresTesting:
     logHostname: yes
     logStatement: all
   persistence:
-    enabled: false
+    enabled: false    # ENV: DEV_PERSIST_DB
   service:
     port: 5432
 
