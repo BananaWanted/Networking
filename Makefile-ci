@@ -4,14 +4,18 @@ CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 
 ci: ci-prepare-env ci-build ci-run ci-after-success
 
-ci-prepare-env: ci-install-helm ci-install-minikube ci-git-login ci-docker-login env-kube-local
+ci-prepare-env: env-kubernetes ci-git-login ci-git-set-username-travis ci-docker-login
 
 ci-build: all
 
 ci-run:
 	$(HELM) dependency update
-	$(HELM) install --name $(HELM_RELEASE_NAME) .
-	$(HELM) status $(HELM_RELEASE_NAME)
+	$(HELM) install $(CI_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) .
+	$(MAKE) ci-wait-job-db-vcs
+	curl -I -X GET "http://$$( \
+		$(HELM) status $(HELM_RELEASE_NAME) | grep -E '^$(HELM_RELEASE_NAME)\s.*\s\d+\.\d+\.\d+\.\d+' | awk '{ print $$3 }' \
+	)"/generate_204 | grep '204 No Content'
+
 
 ci-after-success: ci-docker-push-images ci-tag-the-commit
 
@@ -30,3 +34,9 @@ ci-docker-push-images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
 ci-tag-the-commit:
 	git tag $(BUILD_TAG)
 	git push origin $(BUILD_TAG)
+
+ci-wait-job-%:
+	@until $(HELM) status $(HELM_RELEASE_NAME) | grep -E '^$(HELM_RELEASE_NAME)-$*\s*(\d+)\s*\1.*' 2>&1 >/dev/null; do \
+		echo 'waiting for job $* finished'; \
+	done
+	@echo job $* is completed
