@@ -2,6 +2,14 @@
 
 BEGIN;
 
--- XXX Add DDLs here.
+DROP TABLE ddns_remote_report_history;
+
+DROP TABLE ddns_record_setup;
+
+DROP TABLE user_ident;
+
+DROP FUNCTION gen_random_id_for_human;
+
+DROP EXTENSION "pgcrypto";
 
 COMMIT;
