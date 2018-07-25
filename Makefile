@@ -9,7 +9,9 @@ DOCKER_REGISTRY ?= library
 DOCKER_PASSWORD ?=
 DOCKER_BUILD_ARGS ?= --build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
-HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG)
+DDNS_ZONE ?= local
+HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG) \
+					--set appConfigs.dns.env.DDNS_ZONE=$(DDNS_ZONE)
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 

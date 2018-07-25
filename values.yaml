@@ -24,7 +24,7 @@ postgres:
   existingSecretKey: instance-credential
   cloudsql:
     instances:
-    - project: project    # ENV: PROD_GCP_PROJECT
+    - project: project    # ENV: PROD_GCP_DB_PROJECT
       region: retion      # ENV: PROD_GCP_DB_REGION
       instance: instance  # ENV: PROD_GCP_DB_INSTANCE
       port: 5432
@@ -54,7 +54,7 @@ appConfigs:
     - path: "/ddns/"
     databaseEnabled: true
     env:
-      DDNS_ZONE: local
+      DDNS_ZONE: local  # ENV: DDNS_ZONE
   misc:
     type: service
     pullPolicy: IfNotPresent
