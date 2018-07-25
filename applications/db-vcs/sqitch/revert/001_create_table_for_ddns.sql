@@ -2,9 +2,9 @@
 
 BEGIN;
 
-DROP TABLE ddns_remote_report_history;
+DROP TABLE ddns_remote_report;
 
-DROP TABLE ddns_record_setup;
+DROP TABLE ddns_record;
 
 DROP TABLE user_ident;
 
