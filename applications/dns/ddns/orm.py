@@ -11,17 +11,17 @@ Base = declarative_base()
 class DDNSRecord(Base):
     __tablename__ = 'ddns_record'
 
-    user_id = Column(BIGINT)
+    user_id = Column(BIGINT, nullable=False)
     secret_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex, primary_key=True)
-    public_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex)
-    created_time = Column(DateTime)
+    public_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex, nullable=False)
+    created_time = Column(DateTime, nullable=False)
 
 
 class DDNSRemoteReport(Base):
     __tablename__ = 'ddns_remote_report'
 
     id = Column(BIGINT, primary_key=True)
-    user_id = Column(BIGINT)
-    secret_id = Column(VARCHAR, ForeignKey(DDNSRecord.secret_id))
-    ip = Column(INET)
-    created_time = Column(DateTime)
+    user_id = Column(BIGINT, nullable=False)
+    secret_id = Column(VARCHAR, ForeignKey(DDNSRecord.secret_id), nullable=False)
+    ip = Column(INET, nullable=False)
+    created_time = Column(DateTime, nullable=False)
