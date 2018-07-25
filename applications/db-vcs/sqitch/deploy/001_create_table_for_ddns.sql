@@ -2,7 +2,7 @@
 
 BEGIN;
 
-CREATE EXTENSION "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 
 CREATE FUNCTION gen_random_id_for_human() RETURNS VARCHAR(64) AS $$

@@ -1,8 +1,8 @@
 DEV_HELM_COMMON_FLAGS ?= --wait --debug \
 						--set testing=true,notTesting=false \
 						--set dockerRegistry=$(DOCKER_HUB_USERNAME),buildTag=$(BUILD_TAG) \
-						--set postgresTesting.persistence.enabled=true \
 						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
+						# --set postgresTesting.persistence.enabled=true \
 
 dev-env: env_kube_local env_sqitch
 	$(MINIKUBE) addons enable dashboard
@@ -40,3 +40,9 @@ dev-upgrade:
 
 dev-status:
 	$(HELM) status $(RELEASE_NAME)
+
+dev-drd:
+	eval $$(minikube docker-env) && docker rmi $$(docker images -q -f dangling=true)
+
+dev-docker-%:
+	eval $$(minikube docker-env) && docker $*

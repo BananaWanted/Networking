@@ -71,3 +71,4 @@ appConfigs:
     type: task
     pullPolicy: IfNotPresent
     databaseEnabled: true
+    maxRetrys: 2

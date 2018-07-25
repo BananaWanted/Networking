@@ -8,7 +8,7 @@ DROP TABLE ddns_record;
 
 DROP TABLE user_ident;
 
-DROP FUNCTION gen_random_id_for_human;
+DROP FUNCTION gen_random_id_for_human();
 
 DROP EXTENSION "pgcrypto";
 

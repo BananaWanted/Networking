@@ -12,7 +12,7 @@ class DDNSRecord(Base):
     __tablename__ = 'ddns_record'
 
     user_id = Column(BIGINT)
-    secret_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex)
+    secret_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex, primary_key=True)
     public_id = Column(VARCHAR, default=lambda: uuid.uuid4().hex)
     created_time = Column(DateTime)
 
@@ -20,7 +20,7 @@ class DDNSRecord(Base):
 class DDNSRemoteReport(Base):
     __tablename__ = 'ddns_remote_report'
 
-    id = Column(BIGINT)
+    id = Column(BIGINT, primary_key=True)
     user_id = Column(BIGINT)
     secret_id = Column(VARCHAR, ForeignKey(DDNSRecord.secret_id))
     ip = Column(INET)
