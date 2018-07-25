@@ -54,6 +54,8 @@ appConfigs:
     - path: "/dns"
     - path: "/dns/*"
     databaseEnabled: true
+    env:
+      DDNS_ZONE: local
   misc:
     type: service
     pullPolicy: IfNotPresent
