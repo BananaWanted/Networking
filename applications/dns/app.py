@@ -3,8 +3,8 @@ import os
 
 from sanic import Sanic
 
-from interactive_ddns import bp
-from setup.db import setup_sqlalchemy, teardown_sqlalchemy
+from ddns import bp
+from utils.db import setup_sqlalchemy, teardown_sqlalchemy
 
 app = Sanic()
 # workaround 2 issues:
@@ -12,13 +12,18 @@ app = Sanic()
 #   2. Sanic.config.load_environment_vars("") calls s.split(prefix, 1) which causes a failure
 for k, v in os.environ.items():
     if not k.startswith('_') and not hasattr(app.config, k):
-        try:
-            app.config[k] = int(v)
-        except ValueError:
+        if v.lower() == "true":
+            app.config[k] = True
+        elif v.lower() == "false":
+            app.config[k] = False
+        else:
             try:
-                app.config[k] = float(v)
+                app.config[k] = int(v)
             except ValueError:
-                app.config[k] = v
+                try:
+                    app.config[k] = float(v)
+                except ValueError:
+                    app.config[k] = v
 
 
 @app.listener('before_server_start')
