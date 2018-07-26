@@ -58,6 +58,7 @@ else
 	sudo mv minikube /usr/local/bin/
 	minikube --alsologtostderr config set kubernetes-version v1.11.1
 	minikube --alsologtostderr config set vm-driver none
+	minikube --alsologtostderr config set bootstrapper kubeadm
 	CHANGE_MINIKUBE_NONE_USER=true sudo -E minikube --alsologtostderr start
 	minikube --alsologtostderr update-context
 endif
