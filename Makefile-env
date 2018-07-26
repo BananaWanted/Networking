@@ -3,6 +3,12 @@
 # Note in any condition Docker client should be available in PATH. This makefile won't take care of Docker.
 ENV_OS_NAME ?= $(shell uname -s)
 
+ifeq ($(ENV_OS_NAME), Darwin)
+GREP := grep -E
+else
+GREP := grep -P
+endif
+
 BREW := $(shell command -v brew 2> /dev/null)
 env-brew:
 ifdef BREW
@@ -72,7 +78,7 @@ else
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
-	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 2; done
+	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | $(GREP) -q "Ready=True"; do sleep 2; done
 	minikube --alsologtostderr status
 	sudo minikube --alsologtostderr addons enable kube-dns
 	sudo minikube --alsologtostderr addons enable ingress
