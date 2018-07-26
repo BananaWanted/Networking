@@ -66,7 +66,6 @@ else
 	minikube --alsologtostderr config set vm-driver none
 	minikube --alsologtostderr config set bootstrapper kubeadm
 	minikube --alsologtostderr config set WantReportErrorPrompt false
-	# sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v1.10.0
 	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start
 	minikube --alsologtostderr update-context
 endif
