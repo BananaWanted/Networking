@@ -1,20 +1,21 @@
-APPS := dns misc
-BASE_APPS := sanic
+APPS := dns misc db-vcs
+BASE_APPS := sanic sqitch
 SHELL := bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
 IS_PULL_REQUEST ?= $(or $(TRAVIS_PULL_REQUEST), false)
-DOCKER_HUB_USERNAME ?= library
-DOCKER_HUB_PASSWORD ?=
-DOCKER_BUILD_OPTIONS ?=
-DOCKER_BUILD_ARGS = --build-arg DOCKER_HUB_USERNAME=$(DOCKER_HUB_USERNAME) --build-arg BUILD_TAG=$(BUILD_TAG)
+HELM_RELEASE_NAME ?= release-prod
+DOCKER_REGISTRY ?= library
+DOCKER_PASSWORD ?=
+DOCKER_BUILD_ARGS ?= --build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
+DDNS_ZONE ?= local
+HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG) \
+					--set appConfigs.dns.env.DDNS_ZONE=$(DDNS_ZONE)
 
-.PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all ci_build clean install test)
+.PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 
 all: $(APPS)
-
-ci_build: ci_git_login ci_docker_login all ci_docker_push_images ci_tag_the_commit
 
 $(APPS): $(BASE_APPS)
 
@@ -35,7 +36,7 @@ $(APPS) $(BASE_APPS):
 		if ! git diff --no-ext-diff --exit-code origin/master -- applications/$@ 2>&1 >/dev/null; then \
 			app_modified=yes; \
 		else \
-			if ! ( docker pull $(DOCKER_HUB_USERNAME)/$@:latest && docker pull $(DOCKER_HUB_USERNAME)/$@:latest-test ); then \
+			if ! ( docker pull $(DOCKER_REGISTRY)/$@:latest && docker pull $(DOCKER_REGISTRY)/$@:latest-test ); then \
 				app_not_exists=yes; \
 			fi; \
 		fi; \
@@ -47,78 +48,38 @@ $(APPS) $(BASE_APPS):
 	fi
 
 docker-build-app-%:
-	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) applications/$*
-	docker build $(DOCKER_BUILD_OPTIONS) $(DOCKER_BUILD_ARGS) -t $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
+	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test -f applications/$*/Dockerfile-test applications/$*
 
 docker-retag-app-%:
-	docker tag $(DOCKER_HUB_USERNAME)/$*:latest $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker tag $(DOCKER_HUB_USERNAME)/$*:latest-test $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
+	docker tag $(DOCKER_REGISTRY)/$*:latest $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker tag $(DOCKER_REGISTRY)/$*:latest-test $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 
 docker-push-app-%:
-	@echo pushing $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test
+	@echo pushing $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)
+	docker push $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 ifeq ($(IS_PULL_REQUEST), false)
 	# override latest for master builds
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:latest
-	docker push $(DOCKER_HUB_USERNAME)/$*:latest
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:latest-test
-	docker push $(DOCKER_HUB_USERNAME)/$*:latest-test
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) $(DOCKER_REGISTRY)/$*:latest
+	docker push $(DOCKER_REGISTRY)/$*:latest
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:latest-test
+	docker push $(DOCKER_REGISTRY)/$*:latest-test
 endif
 	# tag branch name for all builds
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG) $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)
-	docker tag $(DOCKER_HUB_USERNAME)/$*:$(BUILD_TAG)-test $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
-	docker push $(DOCKER_HUB_USERNAME)/$*:$(CURRENT_BRANCH)-test
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
+	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
+	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
+	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 
-ci_git_set_username_travis:
-	git config user.email "builds@travis-ci.org"
-	git config user.name "Travis CI"
+sleep-%:
+	sleep $*
 
-ci_git_login:
-	@git remote set-url origin $(shell git remote get-url origin | sed "s#https://#https://$(GITHUB_TOKEN)@#g")
+sqitch-%: env-sqitch
+	$(SQITCH) $* $(ARGS)
 
-ci_tag_the_commit:
-	git tag $(BUILD_TAG)
-	git push origin $(BUILD_TAG)
+noerror-%:
+	-$(MAKE) $*
 
-ci_docker_login:
-	docker login -u $(DOCKER_HUB_USERNAME) -p $(DOCKER_HUB_PASSWORD)
-
-ci_docker_push_images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
-
-system_name := $(shell uname -s)
-helm_install_cmd := $(if ifeq($(system_name), "Darwin), brew install kubernetes-helm, set -o pipefail; curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash)
-kube_check_cluster_connectivity := set -o pipefail; kubectl cluster-info --request-timeout=10 2>/dev/null | head -n 1
-
-helm_install:
-	$(helm_install_cmd)
-	$(kube_check_cluster_connectivity)
-
-minikube_install:
-	minikube addons enable kube-dns
-	minikube addons enable ingress
-
-minikube_dashboard:
-	minikube addons open dashboard
-
-dev-all:
-	eval $(minikube docker-env)
-	$(MAKE) all
-
-dev-install-dryrun:
-	helm install -f values-dev.yaml --debug --dry-run .
-
-dev-install:
-	helm install -f values-dev.yaml .
-
-dev-purge:
-	helm list -a -q | xargs helm delete --purge
-
-dev-reinstall: dev-purge dev-install
-
-dev-upgrade:
-	helm list -a -q | xargs -J % helm upgrade -f values-dev.yaml --force --recreate-pods --wait % .
-
-dev-status:
-	helm list -a -q | xargs helm status
+# you may create a Makefile-local to override the variables.
+include Makefile-*

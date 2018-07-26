@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=Main
+
+001_create_table_for_ddns 2018-07-24T16:05:56Z root <root@5928a6fcf365> # new tables: ddns_clisnt ddns_client_ip_report

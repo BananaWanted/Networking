@@ -1,0 +1,34 @@
+# Everything defined in this file have prefix PROD_ or (prod-)
+# This contains everything to config production environment.
+# Credentials are passed by setting environment variables.
+
+PROD_GCP_DB_KEY_FILE ?=
+PROD_GCP_DB_PROJECT ?=
+PROD_GCP_DB_REGION ?=
+PROD_GCP_DB_INSTANCE ?=
+PROD_GCP_DB_USERNAME ?=
+PROD_GCP_DB_PASSWORD ?=
+
+PROD_GCP_STATIC_IP ?= static-ip
+
+PROD_K8S_SECRET_TLS ?= tls-secret
+PROD_K8S_SECRET_DATABASE ?= database-secret
+
+PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--set tlsSecret="$(PROD_K8S_SECRET_TLS)" \
+						--set databaseSecret="$(PROD_K8S_SECRET_DATABASE)" \
+						--set staticIP="$(PROD_GCP_STATIC_IP)" \
+						--set postgres.existingSecret="$(PROD_K8S_SECRET_DATABASE)" \
+						--set postgres.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
+						--set postgres.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
+						--set postgres.instances[0].region="$(PROD_GCP_DB_REGION)"
+
+prod-secret-database:
+	kubectl create secret generic database-secret \
+		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)"
+		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
+		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
+
+prod-secret-tls:
+
+prod-static-ip:

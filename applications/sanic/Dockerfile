@@ -1,11 +1,12 @@
 FROM python:alpine
 
-ENV WEB_CONCURRENCY=4
+ENV WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
 EXPOSE 80
 
 COPY . /workspace
 WORKDIR /workspace
 RUN apk update \
+    && apk --no-cache add libpq \
     && apk --no-cache add --virtual build-dependencies postgresql-dev gcc python3-dev musl-dev make \
     && pip install -r requirements.txt \
     && apk del --purge build-dependencies \

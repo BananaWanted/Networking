@@ -1,1 +1,9 @@
-something notes
+# {{ list .Chart.Name ": " .Release.Name | join "" }}
+Deployment Succeed!
+
+Testing: {{ .Values.testing }}
+
+{{- range $app, $appConfig := .Values.appConfigs }}
+### App {{ $app }}
+{{- include "Networking.App.Label" (list $app $) }}
+{{- end }}

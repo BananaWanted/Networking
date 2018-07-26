@@ -1,9 +1,0 @@
-testing: true
-
-appsConfig:
-  dns:
-    build: BUILD-debug
-    replicas: 1
-  misc:
-    build: BUILD-debug
-    replicas: 1
