@@ -10,7 +10,7 @@ ifdef BREW
 	$(BREW) update
 else ifeq ($(ENV_OS_NAME), Darwin)
 	/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	$(BREW) update
+	brew update
 else
 	@echo not macOS, skipping Homebrew.
 endif
@@ -49,24 +49,25 @@ ifdef MINIKUBE
 	$(MINIKUBE) status || $(MINIKUBE) start
 else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) cask install minikube
-	$(MINIKUBE) config set kubernetes-version v1.11.1
-	$(MINIKUBE) config set vm-driver hyperkit
-	$(MINIKUBE) start
+	minikube --alsologtostderr config set kubernetes-version v1.11.1
+	minikube --alsologtostderr config set vm-driver hyperkit
+	minikube --alsologtostderr start
 else
-	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.1/minikube-linux-amd64
+	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64
 	chmod +x minikube
 	sudo mv minikube /usr/local/bin/
-	$(MINIKUBE) config set kubernetes-version v1.11.1
-	$(MINIKUBE) config set vm-driver none
-	$(MINIKUBE) start
-	$(MINIKUBE) update-context
+	minikube --alsologtostderr config set kubernetes-version v1.11.1
+	minikube --alsologtostderr config set vm-driver none
+	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start
+	minikube --alsologtostderr update-context
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
 	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 2; done
-	$(MINIKUBE) status
-	$(MINIKUBE) addons enable kube-dns
-	$(MINIKUBE) addons enable ingress
+	minikube --alsologtostderr status
+	minikube --alsologtostderr addons enable kube-dns
+	minikube --alsologtostderr addons enable ingress
+	minikube --alsologtostderr config view
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
 SQITCH := $(shell docker image inspect $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) 2> /dev/null)
@@ -91,3 +92,4 @@ env-destroy-minikube:
 	@echo destroying minikube cluster, press enter to confirm...
 	@read _
 	$(MINIKUBE) delete 
+
