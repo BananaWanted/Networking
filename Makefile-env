@@ -22,9 +22,12 @@ ifdef HELM
 	@echo helm ... check
 else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) install kubernetes-helm
+	helm --help > /dev/null
 else
-	set -o pipefail; \
-	curl -LO https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz
+	tar -xzf helm.tar.gz
+	sudo mv linux-amd64/helm /usr/local/bin/
+	helm --help > /dev/null
 endif
 HELM = $(shell command -v helm 2> /dev/null)
 
@@ -34,10 +37,12 @@ ifdef KUBECTL
 	@echo kubectl ... check
 else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) install kubernetes-cli
+	kubectl --help > /dev/null
 else
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 	chmod +x ./kubectl
 	sudo mv ./kubectl /usr/local/bin/kubectl
+	kubectl --help > /dev/null
 endif
 KUBECTL = $(shell command -v kubectl 2> /dev/null)
 
