@@ -10,7 +10,9 @@ ci-build: all
 
 ci-run:
 	$(HELM) dependency update
-	$(HELM) install $(CI_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) .
+	$(HELM) install $(CI_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) . || ( \
+		kubectl logs -n kube-system $$(kubectl get pods -n kube-system -o custom-columns=:metadata.name | grep tiller) \
+		&& false)
 	$(MAKE) ci-wait-job-db-vcs
 	curl -I -X GET "http://$$( \
 		$(HELM) status $(HELM_RELEASE_NAME) | grep -E '^$(HELM_RELEASE_NAME)\s.*\s\d+\.\d+\.\d+\.\d+' | awk '{ print $$3 }' \
