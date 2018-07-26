@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import asyncio
-from uuid import UUID
 
 import google.cloud.dns
 from sanic.exceptions import NotFound
@@ -8,24 +7,29 @@ from sanic.request import Request
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from interactive_ddns.orm import Client, ClientIPReport
-from setup.db import enable_session, async_sqlalchemy
+from ddns.orm import DDNSRecord, DDNSRemoteReport
+from utils.async_run import arun
+from utils.db import enable_session
 
 
-class ClientReportView(HTTPMethodView):
+class DDNSReportView(HTTPMethodView):
 
     decorators = [enable_session]
 
     async def get(self, request: Request, secret_id: str):
-
-        query = request.app.session.query(Client).filter(Client.secret_id == secret_id)
-        client = await async_sqlalchemy(query.one)
-        report = ClientIPReport(secret_id=secret_id, ip=request.ip)
+        query = request.app.session.query(DDNSRecord).filter(DDNSRecord.secret_id == secret_id)
+        record = await arun(query.one)
+        report = DDNSRemoteReport(
+            user_id=record.user_id,
+            secret_id=secret_id,
+            ip=request.ip)
         request.app.session.add(report)
-
-        endpoint = "{}.{}.".format(client.public_id.hex, request.app.config.DNS_ZONE)
-        await asyncio.get_event_loop().run_in_executor(None, self.update_zone, endpoint, request.ip)
-        return text("ok")
+        endpoint = "{}.{}.".format(record.public_id, request.app.config.DDNS_ZONE)
+        if request.app.config.get("TESTING"):
+            return text("ok. set {} to {}".format(endpoint, request.ip))
+        else:
+            await arun(self.update_zone, endpoint, request.ip)
+            return text("ok")
 
     @staticmethod
     def update_zone(endpoint, ip):

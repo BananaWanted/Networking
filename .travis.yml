@@ -1,4 +1,6 @@
 sudo: required
+language: python
+dist: xenial
 services:
   - docker
 notifications:
@@ -8,7 +10,9 @@ notifications:
 branches:
   only:
     - master
+before_install:
+  - sudo apt-get install -y socat
 script:
-  - make ci_build
+  - make ci
 after_success:
   - docker images

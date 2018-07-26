@@ -1,0 +1,46 @@
+# Everything defined in this file have prefix CI_ or (ci-)
+CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--wait --set testing=true,notTesting=false
+
+ci: ci-prepare-env ci-build ci-run ci-after-success
+
+ci-prepare-env: env-kubernetes ci-git-login ci-git-set-username-travis ci-docker-login
+
+ci-build: all
+
+ci-run:
+	$(HELM) dependency update
+	$(HELM) install $(CI_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) . || ( \
+		kubectl logs -n kube-system $$(kubectl get pods -n kube-system -o custom-columns=:metadata.name | $(GREP) tiller) \
+		&& false)
+	$(MAKE) ci-wait-job-db-vcs
+	curl -I -X GET "http://$$( \
+		$(HELM) status $(HELM_RELEASE_NAME) | $(GREP) '^$(HELM_RELEASE_NAME)\s.*\s\d+\.\d+\.\d+\.\d+' | awk '{ print $$3 }' \
+	)"/generate_204 | $(GREP) '204 No Content'
+
+
+ci-after-success: ci-docker-push-images ci-tag-the-commit
+
+ci-git-set-username-travis:
+	git config user.email "builds@travis-ci.org"
+	git config user.name "Travis CI"
+
+ci-git-login:
+	@git remote set-url origin $(shell git remote get-url origin | sed "s#https://#https://$(GITHUB_TOKEN)@#g")
+
+ci-docker-login:
+	docker login -u $(DOCKER_REGISTRY) -p $(DOCKER_PASSWORD)
+
+ci-docker-push-images: $(addprefix docker-push-app-, $(APPS) $(BASE_APPS))
+
+ci-tag-the-commit:
+	git tag $(BUILD_TAG)
+	git push origin $(BUILD_TAG)
+
+ci-wait-job-%:
+	@echo waiting for job $* finished....
+	@until $(HELM) status $(HELM_RELEASE_NAME) | $(GREP) '^$(HELM_RELEASE_NAME)-$*\s+(\d+)\s+\1' 2>/dev/null; do \
+		$(KUBECTL) logs --all-containers=true -lrelease=$(HELM_RELEASE_NAME) --since=2s; \
+		sleep 2; \
+	done
+	@echo job $* is completed.

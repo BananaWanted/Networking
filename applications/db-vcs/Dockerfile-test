@@ -1,0 +1,6 @@
+ARG DOCKER_REGISTRY
+ARG BUILD_TAG
+# FROM ${DOCKER_REGISTRY}/sqitch:${BUILD_TAG}-test
+
+# currently nothing to do in the testing images, retag the prod image.
+FROM ${DOCKER_REGISTRY}/db-vcs:${BUILD_TAG}

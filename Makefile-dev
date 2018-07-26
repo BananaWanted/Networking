@@ -1,0 +1,53 @@
+# Everything defined in this file have prefix DEV_ or (dev-)
+DEV_PERSIST_DB ?=
+DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--wait --debug \
+						--set testing=true,notTesting=false \
+						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
+
+ifdef DEV_PERSIST_DB
+DEV_HELM_COMMON_FLAGS := $(DEV_HELM_COMMON_FLAGS) --set postgresTesting.persistence.enabled=true
+endif
+
+dev-env: env-kubernetes env-sqitch
+	$(MINIKUBE) addons enable dashboard
+	$(MINIKUBE) addons open dashboard
+
+dev:
+	# make sure you have ran `make dev_env` first
+	eval $$(minikube docker-env) && $(MAKE) all
+
+dev-app-%:
+	# make sure you have ran `make dev_env` first
+	eval $$(minikube docker-env) && $(MAKE) $*
+
+dev-update-dependencies:
+	$(HELM) dependency update
+
+dev-install:
+	$(HELM) install $(DEV_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) .
+
+dev-install-dryrun:
+	$(HELM) install $(DEV_HELM_COMMON_FLAGS) --dry-run .
+
+dev-purge:
+	$(HELM) delete --purge $(HELM_RELEASE_NAME)
+
+dev-purge-all:
+	$(HELM) list -a -q | tee | xargs $(HELM) delete --purge
+	sleep 5
+	eval $$(minikube docker-env) && docker rmi $$(docker images -q)
+
+dev-reinstall: noerror-dev-purge sleep-5 dev-install
+
+dev-upgrade:
+	$(HELM) upgrade $(DEV_HELM_COMMON_FLAGS) --force --recreate-pods --install $(HELM_RELEASE_NAME) .
+
+dev-status:
+	$(HELM) status $(HELM_RELEASE_NAME)
+
+dev-drd:
+	eval $$(minikube docker-env) && docker rmi $$(docker images -q -f dangling=true)
+
+dev-docker-%:
+	eval $$(minikube docker-env) && docker $*
