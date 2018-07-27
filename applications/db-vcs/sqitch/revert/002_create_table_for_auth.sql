@@ -6,6 +6,10 @@ DROP TABLE auth_grant_session;
 
 DROP TABLE auth_grant_password;
 
+DROP FUNCTION verify_password(VARCHAR(72), VARCHAR(60));
+
+DROP FUNCTION hash_password(VARCHAR(72));
+
 DROP TABLE auth_grant_email_validate;
 
 DROP TABLE auth_flags;

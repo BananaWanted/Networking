@@ -15,4 +15,14 @@ FROM auth_grant_password;
 SELECT user_id, created_time, session_key, last_seen
 FROM auth_grant_session;
 
+DO $$
+BEGIN
+    ASSERT verify_password('a', hash_password('a'));
+    ASSERT NOT verify_password('a', hash_password('aa'));
+    ASSERT NOT verify_password(NULL, hash_password('aa'));
+    ASSERT NOT verify_password('a', hash_password(NULL));
+    ASSERT NOT verify_password(NULL, hash_password(NULL));
+END;
+$$;
+
 ROLLBACK;

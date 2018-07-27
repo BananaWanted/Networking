@@ -36,11 +36,27 @@ CREATE TABLE auth_grant_email_validate (
     created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
     updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
-    validate_status         boolean                     NOT NULL    DEFAULT 'false',
+    validate_status         boolean                     NOT NULL    DEFAULT FALSE,
 
     PRIMARY KEY (user_id),
     FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
+
+CREATE FUNCTION hash_password(password VARCHAR(72)) RETURNS VARCHAR(60) AS $$
+BEGIN
+    RETURN crypt(password, gen_salt('bf'));
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION verify_password(password VARCHAR(72), hashed VARCHAR(60)) RETURNS boolean AS $$
+BEGIN
+    IF password IS NULL OR hashed IS NULL THEN
+        RETURN FALSE;
+    ELSE
+        RETURN crypt(password, hashed) = hashed;
+    END IF;
+END;
+$$ LANGUAGE plpgsql CALLED ON NULL INPUT;
 
 CREATE TABLE auth_grant_password (
     user_id                 BIGINT                      NOT NULL,
