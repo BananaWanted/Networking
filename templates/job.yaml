@@ -23,27 +23,27 @@ spec:
           imagePullPolicy: {{ $appConfig.pullPolicy }}
           env:
           {{- if $.Values.testing }}
-          - name: TESTING
+          - name: {{ include "Networking.App.EnvName" (list "TESTING" $appConfig) }}
             value: {{ $.Values.testing | quote }}
           {{- end }}
           {{- if $appConfig.databaseEnabled }}
           {{- if $.Values.testing }}
-          - name: DB_HOST
+          - name: {{ include "Networking.App.EnvName" (list "DB_HOST" $appConfig) }}
             value: {{ list $.Release.Name (default "postgresTesting" $.Values.postgresTesting.nameOverride) | join "-" }}
-          - name: DB_PORT
+          - name: {{ include "Networking.App.EnvName" (list "DB_PORT" $appConfig) }}
             value: {{ $.Values.postgresTesting.service.port | quote }}
           {{- else }}
-          - name: DB_HOST
+          - name: {{ include "Networking.App.EnvName" (list "DB_HOST" $appConfig) }}
             value: {{ list $.Release.Name "postgres" | join "-" }}
-          - name: DB_PORT
+          - name: {{ include "Networking.App.EnvName" (list "DB_PORT" $appConfig) }}
             value: {{ (index $.Values.postgres.cloudsql.instances 0).port | quote }}
           {{- end }}
-          - name: DB_USERNAME
+          - name: {{ include "Networking.App.EnvName" (list "DB_USERNAME" $appConfig) }}
             valueFrom:
               secretKeyRef:
                 name: {{ $.Values.databaseSecret }}
                 key: username
-          - name: DB_PASSWORD
+          - name: {{ include "Networking.App.EnvName" (list "DB_PASSWORD" $appConfig) }}
             valueFrom:
               secretKeyRef:
                 name: {{ $.Values.databaseSecret }}
