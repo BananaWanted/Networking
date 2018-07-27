@@ -24,9 +24,10 @@ CREATE TABLE user_ident (
 
 CREATE TABLE ddns_record (
     user_id                 BIGINT                      NOT NULL,
+    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+
     secret_id               VARCHAR(255)                NOT NULL    DEFAULT gen_random_id_for_human(),
     public_id               VARCHAR(255)                NOT NULL    DEFAULT gen_random_id_for_human(),
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
     PRIMARY KEY (secret_id),
     FOREIGN KEY (user_id) REFERENCES user_ident(id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -38,9 +39,10 @@ CREATE TABLE ddns_record (
 CREATE TABLE ddns_remote_report (
     id                      BIGSERIAL                   NOT NULL,
     user_id                 BIGINT                      NOT NULL,
+    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+
     secret_id               VARCHAR(255)                NOT NULL,
     ip                      INET                        NOT NULL,
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES user_ident(id) ON DELETE RESTRICT ON UPDATE CASCADE,
