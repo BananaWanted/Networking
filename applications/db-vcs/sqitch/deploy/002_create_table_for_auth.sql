@@ -18,8 +18,9 @@ CREATE TYPE permission_flag as ENUM ('ALLOW', 'DENY');
 CREATE TABLE auth_flags (
     user_id                 BIGINT                      NOT NULL,
     created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+    updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
-    grant_email_validate    grant_flag                      NULL    DEFAULT 'MUST',
+    grant_email_validate    grant_flag                      NULL    DEFAULT 'REQUIRED',
     grant_password          grant_flag                      NULL    DEFAULT 'OPTIONAL',
     grant_session           grant_flag                      NULL    DEFAULT 'OPTIONAL',
 
@@ -56,7 +57,7 @@ CREATE TABLE auth_grant_session (
     user_id                 BIGINT                      NOT NULL,
     created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
-    session_key             message_text                NOT NULL,
+    session_key             text                        NOT NULL,
     last_seen               TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
 
     PRIMARY KEY (session_key),

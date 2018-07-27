@@ -2,6 +2,16 @@
 
 BEGIN;
 
--- XXX Add DDLs here.
+DROP TABLE auth_grant_session;
+
+DROP TABLE auth_grant_password;
+
+DROP TABLE auth_grant_email_validate;
+
+DROP TABLE auth_flags;
+
+DROP TYPE permission_flag;
+
+DROP TYPE grant_flag;
 
 COMMIT;
