@@ -12,14 +12,4 @@ FROM auth_grant_email_validate;
 SELECT user_id, created_time, updated_time, password, expired
 FROM auth_grant_password;
 
-DO $$
-BEGIN
-    ASSERT verify_password('a', hash_password('a'));
-    ASSERT NOT verify_password('a', hash_password('aa'));
-    ASSERT NOT verify_password(NULL, hash_password('aa'));
-    ASSERT NOT verify_password('a', hash_password(NULL));
-    ASSERT NOT verify_password(NULL, hash_password(NULL));
-END;
-$$;
-
 ROLLBACK;
