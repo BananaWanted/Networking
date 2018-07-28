@@ -17,26 +17,37 @@ CREATE TYPE permission_flag as ENUM ('ALLOW', 'DENY');
 
 CREATE TABLE auth_flags (
     user_id                 BIGINT                      NOT NULL,
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-    updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
 
     grant_email_validate    grant_flag                      NULL    DEFAULT 'REQUIRED',
     grant_password          grant_flag                      NULL    DEFAULT 'OPTIONAL',
-    grant_session           grant_flag                      NULL    DEFAULT 'OPTIONAL',
 
-    resource_ddns           permission_flag                 NULL,
-    resource_server_info    permission_flag                 NULL,
+    resource_ddns           permission_flag                 NULL    DEFAULT NULL,
+    resource_server_info    permission_flag                 NULL    DEFAULT NULL,
 
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES user_ident(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user_identifiers(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE auth_grant_email_validate (
     user_id                 BIGINT                      NOT NULL,
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-    updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
 
     validate_status         boolean                     NOT NULL    DEFAULT FALSE,
+
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE TABLE auth_grant_password (
+    user_id                 BIGINT                      NOT NULL,
+    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+
+    password                text                        NOT NULL,
+    expired                 boolean                     NOT NULL    DEFAULT FALSE,
 
     PRIMARY KEY (user_id),
     FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -58,35 +69,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql CALLED ON NULL INPUT;
 
-CREATE TABLE auth_grant_password (
-    user_id                 BIGINT                      NOT NULL,
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-    updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-
-    password                text                        NOT NULL,
-
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
-CREATE TABLE auth_grant_session (
-    user_id                 BIGINT                      NOT NULL,
-    created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-
-    session_key             text                        NOT NULL,
-    last_seen               TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
-
-    PRIMARY KEY (session_key),
-    FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
 COMMIT;
 
 -- table template:
 -- CREATE TABLE auth_grant_xxx (
 --     user_id                 BIGINT                      NOT NULL,
---     created_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
---     updated_time            TIMESTAMP WITHOUT TIME ZONE NOT NULL    DEFAULT now(),
+--     created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+--     updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
 --
 --     PRIMARY KEY (user_id),
 --     FOREIGN KEY (user_id) REFERENCES auth_flags(user_id) ON DELETE RESTRICT ON UPDATE CASCADE

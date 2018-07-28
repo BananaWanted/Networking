@@ -3,17 +3,14 @@
 BEGIN;
 
 SELECT user_id, created_time, updated_time, grant_email_validate,
-    grant_password, grant_session, resource_ddns, resource_server_info
+    grant_password, resource_ddns, resource_server_info
 FROM auth_flags;
 
 SELECT user_id, created_time, updated_time, validate_status
 FROM auth_grant_email_validate;
 
-SELECT user_id, created_time, updated_time, password
+SELECT user_id, created_time, updated_time, password, expired
 FROM auth_grant_password;
-
-SELECT user_id, created_time, session_key, last_seen
-FROM auth_grant_session;
 
 DO $$
 BEGIN

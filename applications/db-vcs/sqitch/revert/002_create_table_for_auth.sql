@@ -2,8 +2,6 @@
 
 BEGIN;
 
-DROP TABLE auth_grant_session;
-
 DROP TABLE auth_grant_password;
 
 DROP FUNCTION verify_password(VARCHAR(72), VARCHAR(60));

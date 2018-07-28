@@ -1,5 +1,5 @@
 %syntax-version=1.0.0
 %project=Main
 
-001_create_table_for_ddns 2018-07-24T16:05:56Z root <root@5928a6fcf365> # new tables: user_ident ddns_record ddns_remote_report
-002_create_table_for_auth 2018-07-26T12:02:54Z root <root@4cfe90e5f73c> # new tables: auth_flags auth_grant_email_validate auth_grant_password auth_grant_session
+001_create_table_for_ddns 2018-07-24T16:05:56Z root <root@5928a6fcf365> # new tables: user_identifiers ddns_record ddns_remote_report
+002_create_table_for_auth 2018-07-26T12:02:54Z root <root@4cfe90e5f73c> # new tables: auth_flags auth_grant_email_validate auth_grant_password

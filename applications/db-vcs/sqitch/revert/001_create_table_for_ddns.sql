@@ -6,7 +6,7 @@ DROP TABLE ddns_remote_report;
 
 DROP TABLE ddns_record;
 
-DROP TABLE user_ident;
+DROP TABLE user_identifiers;
 
 DROP FUNCTION gen_random_id_for_human();
 
