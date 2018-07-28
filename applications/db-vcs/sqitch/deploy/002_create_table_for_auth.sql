@@ -14,8 +14,8 @@ CREATE TYPE permission_flag as ENUM ('ALLOW', 'DENY');
 
 CREATE TABLE auth_permission_flags (
     user_id                 BIGINT                      NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
-    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
 
     resource_ddns           permission_flag                 NULL    DEFAULT NULL,
     resource_server_info    permission_flag                 NULL    DEFAULT NULL,
@@ -26,27 +26,27 @@ CREATE TABLE auth_permission_flags (
 
 CREATE TABLE auth_grant_email_validate (
     user_id                 BIGINT                      NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
-    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
     grant_policy            grant_policy_flag           NOT NULL    DEFAULT 'REQUIRED',
 
     validate_status         boolean                     NOT NULL    DEFAULT FALSE,
 
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES user_identifiers(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user_identifiers(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE auth_grant_password (
     user_id                 BIGINT                      NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
-    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
     grant_policy            grant_policy_flag           NOT NULL    DEFAULT 'OPTIONAL',
 
     password                text                        NOT NULL,
     expired                 boolean                     NOT NULL    DEFAULT FALSE,
 
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES user_identifiers(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user_identifiers(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 COMMIT;
@@ -54,8 +54,8 @@ COMMIT;
 -- table templates:
 -- CREATE TABLE auth_grant_xxx (
 --     user_id                 BIGINT                      NOT NULL,
---     created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
---     updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+--     created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+--     updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
 --     grant_policy            grant_policy_flag           NOT NULL    DEFAULT 'REQUIRED',
 --
 --      ...

@@ -10,6 +10,6 @@ DROP TABLE user_identifiers;
 
 DROP FUNCTION gen_random_id_for_human();
 
-DROP EXTENSION "pgcrypto";
+DROP EXTENSION pgcrypto;
 
 COMMIT;

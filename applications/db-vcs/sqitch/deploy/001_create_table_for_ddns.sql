@@ -2,7 +2,7 @@
 
 BEGIN;
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 
 CREATE FUNCTION gen_random_id_for_human() RETURNS VARCHAR(64) AS $$
@@ -15,8 +15,8 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE user_identifiers (
     id                      BIGSERIAL                   NOT NULL,
     email                   VARCHAR(255)                NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
-    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
 
     PRIMARY KEY (id),
     UNIQUE (email)
@@ -25,8 +25,8 @@ CREATE TABLE user_identifiers (
 
 CREATE TABLE ddns_record (
     user_id                 BIGINT                      NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
-    updated_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
 
     secret_id               VARCHAR(255)                NOT NULL    DEFAULT gen_random_id_for_human(),
     public_id               VARCHAR(255)                NOT NULL    DEFAULT gen_random_id_for_human(),
@@ -41,7 +41,7 @@ CREATE TABLE ddns_record (
 CREATE TABLE ddns_remote_report (
     id                      BIGSERIAL                   NOT NULL,
     user_id                 BIGINT                      NOT NULL,
-    created_time            timestamp without time zone NOT NULL    DEFAULT now() AT TIME ZONE 'UTC',
+    created_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
 
     secret_id               VARCHAR(255)                NOT NULL,
     ip                      INET                        NOT NULL,
