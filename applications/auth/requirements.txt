@@ -1,2 +1,4 @@
 sanic
-gunicorn
+PyNaCl
+gino
+sqlalchemy
