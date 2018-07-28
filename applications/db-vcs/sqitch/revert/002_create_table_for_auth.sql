@@ -4,16 +4,12 @@ BEGIN;
 
 DROP TABLE auth_grant_password;
 
-DROP FUNCTION verify_password(VARCHAR(72), VARCHAR(60));
-
-DROP FUNCTION hash_password(VARCHAR(72));
-
 DROP TABLE auth_grant_email_validate;
 
-DROP TABLE auth_flags;
+DROP TABLE auth_permission_flags;
 
 DROP TYPE permission_flag;
 
-DROP TYPE grant_flag;
+DROP TYPE grant_policy_flag;
 
 COMMIT;

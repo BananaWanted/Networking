@@ -2,9 +2,9 @@
 
 BEGIN;
 
-SELECT user_id, created_time, updated_time, grant_email_validate,
-    grant_password, resource_ddns, resource_server_info
-FROM auth_flags;
+SELECT user_id, created_time, updated_time,
+    resource_ddns, resource_server_info
+FROM auth_permission_flags;
 
 SELECT user_id, created_time, updated_time, validate_status
 FROM auth_grant_email_validate;
