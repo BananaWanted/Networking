@@ -17,8 +17,8 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ include "Networking.App.DNSName" (list $app $) }}
-          image:  {{ $.Values.dockerRegistry -}} /
-                  {{- list $app $.Values.buildTag | join ":" }}
+          image:  {{ $.Values.dockerRegistry -}}
+                  / {{- list $app $.Values.buildTag | join ":" }}
                   {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
           env:
