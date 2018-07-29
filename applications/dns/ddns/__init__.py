@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from sanic import Blueprint
 
-from ddns import orm
 from ddns.ddns_report import DDNSReportView
 from ddns.ddns_setup import DDNSSetupView
 
