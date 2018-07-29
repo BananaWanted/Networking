@@ -21,40 +21,7 @@ spec:
                   / {{- list $app $.Values.buildTag | join ":" }}
                   {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
-          env:
-          {{- if $.Values.testing }}
-          - name: {{ include "Networking.App.EnvName" (list "TESTING" $appConfig) }}
-            value: {{ $.Values.testing | quote }}
-          {{- end }}
-          {{- if $appConfig.databaseEnabled }}
-          {{- if $.Values.testing }}
-          - name: {{ include "Networking.App.EnvName" (list "DB_HOST" $appConfig) }}
-            value: {{ list $.Release.Name (default "postgresTesting" $.Values.postgresTesting.nameOverride) | join "-" }}
-          - name: {{ include "Networking.App.EnvName" (list "DB_PORT" $appConfig) }}
-            value: {{ $.Values.postgresTesting.service.port | quote }}
-          {{- else }}
-          - name: {{ include "Networking.App.EnvName" (list "DB_HOST" $appConfig) }}
-            value: {{ list $.Release.Name "postgres" | join "-" }}
-          - name: {{ include "Networking.App.EnvName" (list "DB_PORT" $appConfig) }}
-            value: {{ (index $.Values.postgres.cloudsql.instances 0).port | quote }}
-          {{- end }}
-          - name: {{ include "Networking.App.EnvName" (list "DB_USERNAME" $appConfig) }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $.Values.databaseSecret }}
-                key: username
-          - name: {{ include "Networking.App.EnvName" (list "DB_PASSWORD" $appConfig) }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $.Values.databaseSecret }}
-                key: password
-          {{- end }}
-          {{- if $appConfig.env }}
-          {{- range $key, $val := $appConfig.env }}
-          - name: {{ $key | quote }}
-            value: {{ $val | quote }}
-          {{- end }}
-          {{- end }}
+          {{- include "Networking.App.EnvSection" (list $app $) | indent 10 }}
 ---
 {{- end }}
 {{- end }}
