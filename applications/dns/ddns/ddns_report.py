@@ -18,19 +18,15 @@ class DDNSReportView(HTTPMethodView):
             await DDNSRemoteReport(
                 user_id=record.user_id,
                 secret_id=secret_id,
-                ip=request.ip).create()
+                ip=request.remote_addr).create()
         # release the DB connection, since Google Cloud operations are time consuming.
         endpoint = "{}.{}.".format(record.public_id, request.app.config.DDNS_ZONE)
-        if request.app.config.get("TESTING"):
-            return text(dedent(f"""\
-            set endpoint {endpoint} to ip {request.ip}
-            """))
-        else:
-            # un-blocking the main thread
-            # but the operation is still blocking.
-            await asyncio.get_event_loop().run_in_executor(None, self.update_zone, endpoint, request.ip)
-            return text(endpoint)
+        await asyncio.get_event_loop().run_in_executor(None, self.update_zone, endpoint, request.remote_addr)
+        return (dedent(f"""\
+            set endpoint {endpoint} to ip {request.remote_addr}
 
+            this may take minutes to update
+        """))
 
     @staticmethod
     def update_zone(endpoint, ip):
@@ -40,7 +36,7 @@ class DDNSReportView(HTTPMethodView):
             if endpoint.endswith(zone.dns_name):
                 break
         else:
-            raise NotFound("setup not found")
+            raise NotFound("zone not found")
 
         changes = zone.changes()
 
