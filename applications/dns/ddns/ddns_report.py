@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
+from textwrap import dedent
 
 import google.cloud.dns
 from sanic.exceptions import NotFound
@@ -7,29 +8,29 @@ from sanic.request import Request
 from sanic.response import text
 from sanic.views import HTTPMethodView
 
-from ddns.orm import DDNSRecord, DDNSRemoteReport
-from utils.async_run import arun
-from utils.db import enable_session
+from orm import DDNSRecord, DDNSRemoteReport, db
 
 
 class DDNSReportView(HTTPMethodView):
-
-    decorators = [enable_session]
-
-    async def get(self, request: Request, secret_id: str):
-        query = request.app.session.query(DDNSRecord).filter(DDNSRecord.secret_id == secret_id)
-        record = await arun(query.one)
-        report = DDNSRemoteReport(
-            user_id=record.user_id,
-            secret_id=secret_id,
-            ip=request.ip)
-        request.app.session.add(report)
+    async def get(self, request: Request, secret_id):
+        async with db.transaction():
+            record = await DDNSRecord.get(secret_id)
+            await DDNSRemoteReport(
+                user_id=record.user_id,
+                secret_id=secret_id,
+                ip=request.ip).create()
+        # release the DB connection, since Google Cloud operations are time consuming.
         endpoint = "{}.{}.".format(record.public_id, request.app.config.DDNS_ZONE)
         if request.app.config.get("TESTING"):
-            return text("ok. set {} to {}".format(endpoint, request.ip))
+            return text(dedent(f"""\
+            set endpoint {endpoint} to ip {request.ip}
+            """))
         else:
-            await arun(self.update_zone, endpoint, request.ip)
-            return text("ok")
+            # un-blocking the main thread
+            # but the operation is still blocking.
+            await asyncio.get_event_loop().run_in_executor(None, self.update_zone, endpoint, request.ip)
+            return text(endpoint)
+
 
     @staticmethod
     def update_zone(endpoint, ip):
