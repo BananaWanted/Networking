@@ -1,5 +1,4 @@
 sanic
 sqlalchemy
-aiopg
-psycopg2-binary
+psycopg2
 gunicorn
