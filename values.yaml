@@ -71,6 +71,7 @@ appConfigs:
     ingress:
     - path: "/generate_204"
       port: 80 # if absent the first port in tcpPorts is used
+    - path: "/server-info"
     envDatabase: false
   db-vcs:
     type: task
