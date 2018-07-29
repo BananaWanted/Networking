@@ -40,18 +40,18 @@ PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 # Targets
 
 prod-secret-database:
-	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DATABASE) \
+	$(KUBECTL) replace secret generic $(PROD_K8S_SECRET_DATABASE) \
 		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)" \
 		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
 		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
 
 prod-secret-tls:
-	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_TLS) \
+	$(KUBECTL) replace secret generic $(PROD_K8S_SECRET_TLS) \
 		--from-file=tls.crt="$(PROD_TLS_CERT_FILE)" \
 		--from-file=tls.key="$(PROD_TLS_KEY_FILE)"
 
 prod-secret-dns:
-	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DNS) \
+	$(KUBECTL) replace secret generic $(PROD_K8S_SECRET_DNS) \
 		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
@@ -68,7 +68,7 @@ prod-install-dryrun:
 	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run .
 
 prod-upgrade:
-	$(HELM) upgrade $(PROD_HELM_COMMON_FLAGS) --force --recreate-pods --install $(HELM_RELEASE_NAME) .
+	$(HELM) upgrade $(PROD_HELM_COMMON_FLAGS) --install $(HELM_RELEASE_NAME) .
 
 prod-status:
 	$(HELM) status $(HELM_RELEASE_NAME)
