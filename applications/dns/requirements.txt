@@ -1,20 +1,3 @@
 sanic
-# sanic-jinja2
-# sanic_compress
-# sanic_session
-# sanic-openapi
-# sanic-jwt
-# Sanic-WTF
-
-sqlalchemy
-psycopg2
-
-# google-cloud
+gino
 google-cloud-dns
-# sh
-# fluent-logger
-# google-api-python-client
-# oauth2client
-# PyNaCl
-
-gunicorn

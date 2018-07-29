@@ -1,4 +1,5 @@
 sanic
+gino
 sqlalchemy
 psycopg2
 gunicorn
