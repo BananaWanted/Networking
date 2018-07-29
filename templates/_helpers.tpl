@@ -78,3 +78,30 @@ env:
 
 {{- end }}
 {{- end -}}
+
+{{- define "Networking.App.Volumes" -}} {{- /* params: app: String, globalContext: map */ -}}
+{{- $app := index . 0 }}
+{{- $global := index . 1 }}
+{{- $appConfig := index $global.Values.appConfigs $app }}
+{{- if $appConfig.mountSecrets }}
+volumes:
+  {{- range $i, $secretMount := $appConfig.mountSecrets }}
+  - name: {{ list $global.Release.Name "secret" $secretMount.name | join "-" }}
+    secret:
+      secretName: {{ $secretMount.name }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "Networking.App.VolumeMounts" -}} {{- /* params: app: String, globalContext: map */ -}}
+{{- $app := index . 0 }}
+{{- $global := index . 1 }}
+{{- $appConfig := index $global.Values.appConfigs $app }}
+{{- if $appConfig.mountSecrets }}
+volumeMounts:
+  {{- range $i, $secretMount := $appConfig.mountSecrets }}
+  - name: {{ list $global.Release.Name "secret" $secretMount.name | join "-" }}
+    mountPath: {{ $secretMount.path | quote }}
+  {{- end }}
+{{- end }}
+{{- end -}}

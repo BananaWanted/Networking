@@ -16,6 +16,7 @@ spec:
       labels:
         {{- include "Networking.App.Label" (list $app $) | indent 8 }}
     spec:
+      {{- include "Networking.App.Volumes" (list $app $) | indent 6 }}
       containers:
         - name: {{ include "Networking.App.DNSName" (list $app $) }}
           image:  {{ $.Values.dockerRegistry -}} /
@@ -34,6 +35,7 @@ spec:
             {{- end }}
           {{- end }}
           {{- include "Networking.App.EnvSection" (list $app $) | indent 10 }}
+          {{- include "Networking.App.VolumeMounts" (list $app $) | indent 10 }}
 ---
 {{- end }}
 {{- end }}

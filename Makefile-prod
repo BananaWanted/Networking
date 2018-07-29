@@ -2,6 +2,8 @@
 # This contains everything to config production environment.
 # Credentials are passed by setting environment variables.
 
+# Database Settings
+
 PROD_GCP_DB_KEY_FILE ?=
 PROD_GCP_DB_PROJECT ?=
 PROD_GCP_DB_REGION ?=
@@ -9,10 +11,21 @@ PROD_GCP_DB_INSTANCE ?=
 PROD_GCP_DB_USERNAME ?=
 PROD_GCP_DB_PASSWORD ?=
 
-PROD_GCP_STATIC_IP ?= static-ip
-
-PROD_K8S_SECRET_TLS ?= tls-secret
 PROD_K8S_SECRET_DATABASE ?= database-secret
+
+# DNS Settings
+
+PROD_GCP_DNS_KEY_FILE ?=
+PROD_K8S_SECRET_DNS ?= dns-secret
+
+# Ingress Settings
+
+PROD_GCP_STATIC_IP ?= static-ip
+PROD_K8S_SECRET_TLS ?= tls-secret
+PROD_TLS_CERT_FILE ?=
+PROD_TLS_KEY_FILE ?=
+
+# Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--set tlsSecret="$(PROD_K8S_SECRET_TLS)" \
@@ -21,14 +34,41 @@ PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--set postgres.existingSecret="$(PROD_K8S_SECRET_DATABASE)" \
 						--set postgres.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
-						--set postgres.instances[0].region="$(PROD_GCP_DB_REGION)"
+						--set postgres.instances[0].region="$(PROD_GCP_DB_REGION)" \
+						--set appConfigs.dns.mountSecrets[0].name="$(PROD_K8S_SECRET_DNS)"
+
+# Targets
 
 prod-secret-database:
-	kubectl create secret generic database-secret \
-		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)"
+	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DATABASE) \
+		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)" \
 		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
 		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
 
 prod-secret-tls:
+	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_TLS) \
+		--from-file=tls.crt="$(PROD_TLS_CERT_FILE)" \
+		--from-file=tls.key="$(PROD_TLS_KEY_FILE)"
+
+prod-secret-dns:
+	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DNS) \
+		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
+
+prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
+
+prod-update-dependencies:
+	$(HELM) dependency update
+
+prod-install:
+	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) .
+
+prod-install-dryrun:
+	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run .
+
+prod-upgrade:
+	$(HELM) upgrade $(PROD_HELM_COMMON_FLAGS) --force --recreate-pods --install $(HELM_RELEASE_NAME) .
+
+prod-status:
+	$(HELM) status $(HELM_RELEASE_NAME)

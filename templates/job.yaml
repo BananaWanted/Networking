@@ -11,10 +11,11 @@ spec:
   backoffLimit: {{ $appConfig.maxRetrys | default 6 }}
   template:
     metadata:
-    labels:
-      {{- include "Networking.App.Label" (list $app $) | indent 8 }}
+      labels:
+        {{- include "Networking.App.Label" (list $app $) | indent 8 }}
     spec:
       restartPolicy: Never
+      {{- include "Networking.App.Volumes" (list $app $) | indent 6 }}
       containers:
         - name: {{ include "Networking.App.DNSName" (list $app $) }}
           image:  {{ $.Values.dockerRegistry -}}
@@ -22,6 +23,7 @@ spec:
                   {{- if $.Values.testing -}} -test {{- end }}
           imagePullPolicy: {{ $appConfig.pullPolicy }}
           {{- include "Networking.App.EnvSection" (list $app $) | indent 10 }}
+          {{- include "Networking.App.VolumeMounts" (list $app $) | indent 10 }}
 ---
 {{- end }}
 {{- end }}
