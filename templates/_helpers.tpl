@@ -16,3 +16,10 @@ release: {{ $global.Release.Name }}
 build: {{ $global.Values.buildTag }}
 testing: {{ $global.Values.testing | quote }}
 {{- end -}}
+
+{{- define "Networking.App.EnvName" -}} {{- /* params: rawEnvName: String, appConfig: map */ -}}
+{{- $rawEnvName := index . 0 }}
+{{- $appConfig := index . 1 }}
+{{- $envPrefix := $appConfig.envPrefix | default "" }}
+{{- $envPrefix -}} {{- $rawEnvName }}
+{{- end -}}
