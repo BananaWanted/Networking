@@ -7,6 +7,9 @@ from orm import db
 
 app = Sanic()
 
+if app.config.get('TESTING'):
+    app.debug = app.config.debug = True
+
 # create alias for db settings. which names are required by GINO Sanic extension
 if app.config.get('DB_USERNAME'):
     app.config.DB_USER = app.config.DB_USERNAME
