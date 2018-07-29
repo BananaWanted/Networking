@@ -30,9 +30,11 @@ CREATE TABLE auth_grant_email_validate (
     updated_time            timestamp without time zone NOT NULL    DEFAULT (now() AT TIME ZONE 'UTC'),
     grant_policy            grant_policy_flag           NOT NULL    DEFAULT 'REQUIRED',
 
+    email                   text                        NOT NULL,
     validate_status         boolean                     NOT NULL    DEFAULT FALSE,
 
     PRIMARY KEY (user_id),
+    UNIQUE (email),
     FOREIGN KEY (user_id) REFERENCES user_identifiers(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
