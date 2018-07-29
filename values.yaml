@@ -52,6 +52,7 @@ appConfigs:
     udpPorts: []
     ingress:
     - path: "/ddns/"
+    envPrefix: "SANIC_"
     databaseEnabled: true
     env:
       DDNS_ZONE: local  # ENV: DDNS_ZONE
