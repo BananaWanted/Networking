@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 from gino.ext.sanic import Gino
+from sqlalchemy.dialects.postgresql import INET
 
 db = Gino()
 
@@ -26,4 +27,4 @@ class DDNSRemoteReport(db.Model):
 
     id = db.Column(db.BIGINT, primary_key=True)
     secret_id = db.Column(db.VARCHAR, db.ForeignKey('ddns_record.secret_id'))
-    ip = db.Column(db.INET)
+    ip = db.Column(INET)

@@ -12,7 +12,7 @@ from orm import DDNSRecord, DDNSRemoteReport, db
 
 
 class DDNSReportView(HTTPMethodView):
-    async def get(self, request: Request, secret_id: str):
+    async def get(self, request: Request, secret_id):
         async with db.transaction():
             record = await DDNSRecord.get(secret_id)
             await DDNSRemoteReport(
@@ -20,7 +20,6 @@ class DDNSReportView(HTTPMethodView):
                 secret_id=secret_id,
                 ip=request.ip).create()
         # release the DB connection, since Google Cloud operations are time consuming.
-        await request['connection'].release()
         endpoint = "{}.{}.".format(record.public_id, request.app.config.DDNS_ZONE)
         if request.app.config.get("TESTING"):
             return text(dedent(f"""\

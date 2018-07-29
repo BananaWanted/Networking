@@ -1,3 +1,4 @@
 sanic
+Sanic-WTF
 gino
 google-cloud-dns
