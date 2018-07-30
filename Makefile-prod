@@ -58,6 +58,10 @@ prod-static-ip:
 
 prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
 
+prod-helm-init:
+	kubectl create -f tiller-rbac-config.yaml
+	$(HELM) init --service-account tiller
+
 prod-update-dependencies:
 	$(HELM) dependency update
 
@@ -65,7 +69,7 @@ prod-install:
 	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --name $(HELM_RELEASE_NAME) .
 
 prod-install-dryrun:
-	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run .
+	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run --debug .
 
 prod-upgrade:
 	$(HELM) upgrade $(PROD_HELM_COMMON_FLAGS) --install $(HELM_RELEASE_NAME) .
