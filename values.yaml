@@ -59,7 +59,7 @@ appConfigs:
     env_raw:
       GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/key.json
     mountSecrets:
-    - name: dns-secret  # ENV: PROD_K8S_SECRET_DNS
+    - name: dns-secret
       path: /var/secrets/google/
   misc:
     type: service

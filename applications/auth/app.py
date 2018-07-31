@@ -2,6 +2,7 @@
 
 from sanic import Sanic
 from sanic.request import Request
+from sanic.response import text
 
 from models import db
 from views import AuthDescribe, AuthGetToken, AuthCreateRole
@@ -20,6 +21,11 @@ db.init_app(app)
     (AuthGetToken.as_view(), "/auth/get_token/"),     # verify identity and produce an access token
     (AuthCreateRole.as_view(), "/auth/create_role/"),    # create user
 ]]
+
+
+@app.route("/")
+def health_check(request):
+    return text("ok")
 
 
 if __name__ == "__main__":

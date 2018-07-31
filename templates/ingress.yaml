@@ -6,9 +6,11 @@ metadata:
     chart: {{ list .Chart.Name .Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
-  {{- if .Values.testing }}
   annotations:
+  {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  {{- else }}
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.staticIP | quote }}
   {{- end }}
 
 spec:
