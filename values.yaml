@@ -46,7 +46,7 @@ appConfigs:
   dns:
     type: service
     pullPolicy: IfNotPresent
-    replicas: 3
+    replicas: 1
     serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
@@ -65,7 +65,7 @@ appConfigs:
   misc:
     type: service
     pullPolicy: IfNotPresent
-    replicas: 3
+    replicas: 1
     serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
