@@ -2,7 +2,7 @@
 
 from sanic import Sanic
 from sanic.request import Request
-from sanic.response import json
+from sanic.response import json, text
 
 app = Sanic()
 
@@ -43,6 +43,11 @@ async def server_info(request: Request):
         "url": request.url,
         "headers": request.headers,
     })
+
+
+@app.route("/")
+def health_check(request):
+    return text("ok")
 
 
 if __name__ == "__main__":

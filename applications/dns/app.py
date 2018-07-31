@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sanic import Sanic
+from sanic.response import text
 
 from ddns import bp
 from orm import db
@@ -18,6 +19,11 @@ db.init_app(app)
 
 
 app.blueprint(bp)
+
+
+@app.route("/")
+def health_check(request):
+    return text("ok")
 
 
 if __name__ == "__main__":
