@@ -55,6 +55,7 @@ prod-secret-dns:
 		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
+	gcloud compute addresses create $(PROD_GCP_STATIC_IP) --global
 
 prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
 
