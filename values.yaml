@@ -17,7 +17,7 @@ dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
 databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database.
-staticIP: static-ip       # static-ip name (in gce) for ingress.
+staticIP: &staticIP static-ip       # static-ip name (in gce) for ingress.
 
 postgres:
   existingSecret: *databaseSecret
@@ -30,7 +30,11 @@ postgres:
       port: 5432
 
 nginx-ingress:
-
+  controller:
+    service:
+      loadBalancerIP: *staticIP
+  rbac:
+    create: true
 
 postgresTesting:
   nameOverride: postgres-testing

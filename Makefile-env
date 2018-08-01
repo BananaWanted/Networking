@@ -81,7 +81,7 @@ endif
 	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | $(GREP) -q "Ready=True"; do sleep 2; done
 	minikube --alsologtostderr status
 	sudo minikube --alsologtostderr addons enable kube-dns
-	sudo minikube --alsologtostderr addons enable ingress
+	sudo minikube --alsologtostderr addons disable ingress
 	minikube --alsologtostderr config view
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
