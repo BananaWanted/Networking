@@ -15,12 +15,12 @@ notTesting: true   # workaround the issue that currently no way to have logic no
 
 dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_REGISTRY
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
-tlsSecret: tls-secret     # secret storing the tls certs for ingress. ENV: PROD_K8S_SECRET_TLS
-databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database. ENV: PROD_K8S_SECRET_DATABASE
-staticIP: static-ip       # static-ip name (in gce) for ingress. ENV: PROD_GCP_STATIC_IP
+tlsSecret: tls-secret     # secret storing the tls certs for ingress.
+databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database.
+staticIP: static-ip       # static-ip name (in gce) for ingress.
 
 postgres:
-  existingSecret: *databaseSecret   # ENV: PROD_K8S_SECRET_DATABASE
+  existingSecret: *databaseSecret
   existingSecretKey: instance-credential
   cloudsql:
     instances:
@@ -28,6 +28,9 @@ postgres:
       region: retion      # ENV: PROD_GCP_DB_REGION
       instance: instance  # ENV: PROD_GCP_DB_INSTANCE
       port: 5432
+
+nginx-ingress:
+
 
 postgresTesting:
   nameOverride: postgres-testing
@@ -58,7 +61,7 @@ appConfigs:
       DDNS_ZONE: local  # ENV: DDNS_ZONE
     env_raw:
       GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/key.json
-#     WEB_CONCURRENCY: 1
+      WEB_CONCURRENCY: 1
     mountSecrets:
     - name: dns-secret
       path: /var/secrets/google/
@@ -74,8 +77,8 @@ appConfigs:
       port: 80 # if absent the first port in tcpPorts is used
     - path: "/server-info"
     envDatabase: false
-#   env_raw:
-#     WEB_CONCURRENCY: 1
+    env_raw:
+      WEB_CONCURRENCY: 1
   db-vcs:
     type: task
     pullPolicy: IfNotPresent
