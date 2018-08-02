@@ -16,9 +16,7 @@ ci-run:
 		kubectl logs -n kube-system $$(kubectl get pods -n kube-system -o custom-columns=:metadata.name | $(GREP) tiller) \
 		&& false)
 	$(MAKE) ci-wait-job-db-vcs
-	curl -I -X GET "http://$$( \
-		$(HELM) status $(HELM_RELEASE_NAME) | $(GREP) '^$(HELM_RELEASE_NAME)\s.*\s\d+\.\d+\.\d+\.\d+' | awk '{ print $$3 }' \
-	)"/generate_204 | $(GREP) '204 No Content'
+	curl -I -X GET "$$($(MINIKUBE) service $(HELM_RELEASE_NAME)-nginx-ingress-controller --url)/generate_204" | $(GREP) '204 No Content'
 
 
 ci-after-success: ci-docker-push-images ci-tag-the-commit
