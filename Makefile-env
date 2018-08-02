@@ -61,6 +61,14 @@ ifdef MINIKUBE
 	$(MINIKUBE) status || $(MINIKUBE) start
 else ifeq ($(ENV_OS_NAME), Darwin)
 	$(BREW) cask install minikube
+
+	curl -Lo docker-machine-driver-hyperkit https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-hyperkit
+	chmod +x docker-machine-driver-hyperkit
+	sudo cp -f docker-machine-driver-hyperkit /usr/local/bin/
+	rm -f docker-machine-driver-hyperkit
+	sudo chown root:wheel /usr/local/bin/docker-machine-driver-hyperkit
+	sudo chmod u+s /usr/local/bin/docker-machine-driver-hyperkit
+
 	minikube --alsologtostderr config set kubernetes-version v1.11.1
 	minikube --alsologtostderr config set vm-driver hyperkit
 	minikube --alsologtostderr config set WantReportErrorPrompt false
@@ -80,8 +88,12 @@ endif
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
 	until $(KUBECTL) get nodes -o jsonpath="$$JSONPATH" 2>&1 | $(GREP) -q "Ready=True"; do sleep 2; done
 	minikube --alsologtostderr status
-	sudo minikube --alsologtostderr addons enable kube-dns
-	sudo minikube --alsologtostderr addons enable ingress
+	if minikube addons list | grep 'ingress: enabled'; then \
+		sudo minikube --alsologtostderr addons disable ingress; \
+	fi
+	if minikube addons list | grep 'kube-dns: disabled'; then \
+		sudo minikube --alsologtostderr addons enable kube-dns; \
+	fi
 	minikube --alsologtostderr config view
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
