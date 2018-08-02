@@ -54,7 +54,7 @@ appConfigs:
     type: service
     pullPolicy: IfNotPresent
     replicas: 1
-    serviceType: NodePort
+    serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
     ingress:
@@ -73,12 +73,12 @@ appConfigs:
     type: service
     pullPolicy: IfNotPresent
     replicas: 1
-    serviceType: NodePort
+    serviceType: ClusterIP
     tcpPorts: [80]
     udpPorts: []
     ingress:
     - path: "/generate_204"
-      port: 80 # if absent the first port in tcpPorts is used
+      port: 80 # if absent the first port in tcpPorts will be used
     - path: "/server-info"
     envDatabase: false
     env_raw:

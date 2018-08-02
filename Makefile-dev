@@ -10,6 +10,8 @@ DEV_HELM_COMMON_FLAGS := $(DEV_HELM_COMMON_FLAGS) --set postgresTesting.persiste
 endif
 
 dev-env: env-kubernetes env-sqitch
+	-$(KUBECTL) create secret generic dns-secret \
+		--from-literal=key.json="test"
 	$(MINIKUBE) addons enable dashboard
 	$(MINIKUBE) addons open dashboard
 
