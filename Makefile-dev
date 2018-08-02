@@ -3,7 +3,11 @@ DEV_PERSIST_DB ?=
 DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--wait --debug \
 						--set testing=true,notTesting=false \
+						--set nginx-ingress.controller.service.type=NodePort \
+						--set nginx-ingress.controller.service.nodePorts.http=30001 \
+						--set nginx-ingress.controller.service.enableHttps=false \
 						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
+						# --set nginx-ingress.controller.service.labels."kubernetes\.io/minikube-addons-endpoint"=ingress \
 
 ifdef DEV_PERSIST_DB
 DEV_HELM_COMMON_FLAGS := $(DEV_HELM_COMMON_FLAGS) --set postgresTesting.persistence.enabled=true
