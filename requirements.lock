@@ -5,5 +5,8 @@ dependencies:
 - name: gcloud-sqlproxy
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 0.4.0
-digest: sha256:1f22ffc10166492bbdee8d4f4dab55949cb1da1a621eafbc1ca3926822b27499
-generated: 2018-07-24T17:47:37.887279609+08:00
+- name: nginx-ingress
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.23.0
+digest: sha256:d3d8bbfac486092b2dbdda34a070389dbe137317ae71ea508c57239c0bedb995
+generated: 2018-08-02T21:59:13.040894462+08:00
