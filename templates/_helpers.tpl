@@ -105,3 +105,17 @@ volumeMounts:
   {{- end }}
 {{- end }}
 {{- end -}}
+
+{{- define "Networking.App.initContainers" -}} {{- /* params: app: String, globalContext: map */ -}}
+{{- $app := index . 0 }}
+{{- $global := index . 1 }}
+{{- $appConfig := index $global.Values.appConfigs $app }}
+  {{- if $appConfig.envDatabase }}
+initContainers:
+- name: {{ include "Networking.App.DNSName" (list $app $) }}-wait-for-db
+  image: {{ $.Values.dockerRegistry -}} /
+        {{- list "wait-for-db" $.Values.buildTag | join ":" }}
+        {{- if $.Values.testing -}} -test {{- end }}
+  {{- include "Networking.App.EnvSection" (list $app $) | indent 2 }}
+  {{- end }}
+{{- end -}}
