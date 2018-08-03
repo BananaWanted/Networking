@@ -42,7 +42,7 @@ prod-secret-tls:
 		--key="$(PROD_TLS_KEY_FILE)"
 
 prod-secret-dns:
-	$(KUBECTL) create secret generic prod-secret-dns \
+	$(KUBECTL) create secret generic dns-secret \
 		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
