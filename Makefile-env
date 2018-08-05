@@ -72,7 +72,7 @@ else ifeq ($(ENV_OS_NAME), Darwin)
 	minikube --alsologtostderr config set kubernetes-version v1.11.1
 	minikube --alsologtostderr config set vm-driver hyperkit
 	minikube --alsologtostderr config set WantReportErrorPrompt false
-	minikube --alsologtostderr start
+	minikube --alsologtostderr start --vm-driver hyperkit
 else
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64
 	chmod +x minikube
@@ -81,7 +81,7 @@ else
 	minikube --alsologtostderr config set vm-driver none
 	minikube --alsologtostderr config set bootstrapper kubeadm
 	minikube --alsologtostderr config set WantReportErrorPrompt false
-	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start
+	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none
 	minikube --alsologtostderr update-context
 endif
 	# wait for booting

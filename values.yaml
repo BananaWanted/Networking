@@ -63,7 +63,6 @@ appConfigs:
     envDatabase: true
     env:
       DDNS_ZONE: local  # ENV: DDNS_ZONE
-    env_raw:
       GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/key.json
       WEB_CONCURRENCY: 1
     mountSecrets:
@@ -81,12 +80,12 @@ appConfigs:
       port: 80 # if absent the first port in tcpPorts will be used
     - path: "/server-info"
     envDatabase: false
-    env_raw:
+    env:
       WEB_CONCURRENCY: 1
   db-vcs:
     type: task
     pullPolicy: IfNotPresent
     envDatabase: true
     maxRetrys: 1
-    env_raw:
+    env:
       TZ: UTC
