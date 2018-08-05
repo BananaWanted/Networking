@@ -26,7 +26,7 @@ dev-app-%:
 	# make sure you have ran `make dev_env` first
 	eval $$(minikube docker-env) && $(MAKE) $*
 
-dev-update-dependencies:
+dev-update:
 	$(HELM) dependency update
 
 dev-install:
