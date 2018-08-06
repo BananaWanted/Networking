@@ -106,6 +106,10 @@ env-cert-manager: env-helm
 		--set ingressShim.defaultACMEChallengeType=DNS01 \
 		--set ingressShim.defaultACMEDNS01ChallengeProvider=default-dns01-provider \
 		stable/cert-manager
+	# wait for booting
+	until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
+		sleep 2; \
+	done
 
 env-kubernetes: env-kubectl env-minikube env-helm
 	# verify kubernetes is ready for use
