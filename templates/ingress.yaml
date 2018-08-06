@@ -7,7 +7,7 @@ metadata:
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
   annotations:
-    external-dns.alpha.kubernetes.io/ttl: "60"
+#   external-dns.alpha.kubernetes.io/ttl: "60"  # bug: https://github.com/kubernetes-incubator/external-dns/issues/467
   {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   {{- end }}
