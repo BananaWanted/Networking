@@ -23,6 +23,7 @@ ci-run:
 	$(MAKE) ci-wait-job-db-vcs
 	RETRY_TIME=0; \
 	until curl -i "$$($(MINIKUBE) service $(HELM_RELEASE_NAME)-nginx-ingress-controller --url)/generate_204" | $(GREP) '204 No Content' || [[ $$RETRY_TIME -ge 5 ]]; do \
+		$(KUBECTL) get service $(HELM_RELEASE_NAME)-nginx-ingress-controller; \
 		sleep 5; \
 	done
 
