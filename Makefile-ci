@@ -2,12 +2,12 @@
 CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--wait \
 						--set testing=true,notTesting=false \
-						--set nginx-ingress.controller.service.externalTrafficPolicy=nil \
+						--set nginx-ingress.controller.service.externalTrafficPolicy=null \
 						--set nginx-ingress.controller.service.type=NodePort \
 						--set nginx-ingress.controller.service.nodePorts.http=30001 \
 						--set nginx-ingress.controller.service.enableHttps=false
-						# --set nginx-ingress.controller.kind=nil \
-						# --set nginx-ingress.controller.service.loadBalancerIP=nil \
+						# --set nginx-ingress.controller.kind=null \
+						# --set nginx-ingress.controller.service.loadBalancerIP=null \
 
 
 ci: ci-prepare-env ci-build ci-run ci-after-success
