@@ -51,7 +51,7 @@ prod-secret-dns:
 
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
-PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) 2> /dev/null)
+PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
 
 prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
 
