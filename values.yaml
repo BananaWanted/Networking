@@ -53,6 +53,9 @@ external-dns:
     project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
     serviceAccountSecret: dns-secret
 
+cert-manager:
+
+cert-manager-testing:
 
 postgresTesting:
   nameOverride: postgres-testing

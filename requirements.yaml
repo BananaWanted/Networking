@@ -16,3 +16,12 @@ dependencies:
   version: 0.7.1
   repository: https://kubernetes-charts.storage.googleapis.com
   condition: notTesting
+- name: cert-manager
+  version: v0.4.0
+  repository: https://kubernetes-charts.storage.googleapis.com
+  condition: notTesting
+- name: cert-manager
+  version: v0.4.0
+  repository: https://kubernetes-charts.storage.googleapis.com
+  condition: testing
+  alias: cert-manager-testing
