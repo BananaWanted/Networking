@@ -24,7 +24,7 @@ spec:
   {{- range $i, $host := .Values.hosts }}
   - http:
       paths:
-      {{- range $app, $appConfig := .Values.appConfigs }}
+      {{- range $app, $appConfig := $.Values.appConfigs }}
         {{- if $appConfig.ingress -}}
           {{- with $ }}
             {{- range $i, $ingressConfig:= $appConfig.ingress }}
