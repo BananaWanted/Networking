@@ -1,5 +1,5 @@
 APPS := dns misc db-vcs
-BASE_APPS := sanic sqitch
+BASE_APPS := sanic sqitch wait-for-db
 SHELL := bash
 BUILD_TAG ?= BUILD-$(or $(TRAVIS_BUILD_NUMBER), debug)
 CURRENT_BRANCH ?= $(or $(TRAVIS_PULL_REQUEST_BRANCH), $(TRAVIS_BRANCH), $(shell git rev-parse --abbrev-ref HEAD))
