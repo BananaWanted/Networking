@@ -15,7 +15,8 @@ PROD_GCP_DB_PASSWORD ?=
 PROD_GCP_IP_REGION ?=
 
 # DNS Settings
-
+PROD_GCP_DNS_HOSTNAME ?=
+PROD_GCP_DNS_PROJECT ?=
 PROD_GCP_DNS_KEY_FILE ?=
 
 # Ingress Settings
@@ -26,6 +27,8 @@ PROD_TLS_KEY_FILE ?=
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--set dnsName="$(PROD_GCP_DNS_HOSTNAME)" \
+						--set external-dns.google.project="$(PROD_GCP_DNS_PROJECT)" \
 						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
@@ -47,7 +50,7 @@ prod-secret-tls:
 
 prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
-		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
+		--from-file=credentials.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)

@@ -10,6 +10,7 @@ metadata:
   {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   {{- end }}
+    external-dns.alpha.kubernetes.io/ttl: "60"
 
 spec:
   {{- if not .Values.testing }}
@@ -17,7 +18,8 @@ spec:
   - secretName: {{ .Values.tlsSecret }}
   {{- end }}
   rules:
-  - http:
+  - host: {{ .Values.dnsName | quote }}
+    http:
       paths:
       {{- range $app, $appConfig := .Values.appConfigs }}
         {{- if $appConfig.ingress -}}

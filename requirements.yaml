@@ -12,3 +12,7 @@ dependencies:
 - name: nginx-ingress
   version: 0.23.0
   repository: https://kubernetes-charts.storage.googleapis.com
+- name: external-dns
+  version: 0.7.1
+  repository: https://kubernetes-charts.storage.googleapis.com
+  condition: notTesting
