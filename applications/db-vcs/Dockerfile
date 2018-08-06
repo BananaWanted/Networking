@@ -3,6 +3,4 @@ ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sqitch:${BUILD_TAG}
 
 COPY sqitch .
-COPY waiting_for_db.sh /waiting_for_db.sh
-
-CMD /waiting_for_db.sh && sqitch deploy --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}
+CMD sqitch deploy --verify db:pg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}
