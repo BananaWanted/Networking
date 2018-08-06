@@ -50,6 +50,7 @@ ci-wait-job-%:
 	@echo waiting for job $* finished....
 	@until $(HELM) status $(HELM_RELEASE_NAME) | $(GREP) '^$(HELM_RELEASE_NAME)-$*\s+(\d+)\s+\1' 2>/dev/null; do \
 		$(KUBECTL) logs --all-containers=true -lrelease=$(HELM_RELEASE_NAME) --since=2s; \
+		sudo iptables -t nat -L; \
 		sleep 2; \
 	done
 	@echo job $* is completed.
