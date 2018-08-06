@@ -17,7 +17,8 @@ dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
 databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database.
-dnsName: a.local  # ENV: PROD_GCP_DNS_HOSTNAME
+hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: PROD_GCP_DNS_HOSTNAME
+  - "*"
 
 postgres:
   existingSecret: *databaseSecret

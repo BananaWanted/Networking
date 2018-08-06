@@ -7,9 +7,12 @@ metadata:
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
   annotations:
-#   external-dns.alpha.kubernetes.io/ttl: "60"  # bug: https://github.com/kubernetes-incubator/external-dns/issues/467
+  kubernetes.io/ingress.class: nginx
+    # external-dns.alpha.kubernetes.io/ttl: "60"  # bug: https://github.com/kubernetes-incubator/external-dns/issues/467
   {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  {{- else }}
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   {{- end }}
 
 spec:
@@ -18,8 +21,8 @@ spec:
   - secretName: {{ .Values.tlsSecret }}
   {{- end }}
   rules:
-  - host: {{ .Values.dnsName | quote }}
-    http:
+  {{- range $i, $host := .Values.hosts }}
+  - http:
       paths:
       {{- range $app, $appConfig := .Values.appConfigs }}
         {{- if $appConfig.ingress -}}
@@ -33,3 +36,7 @@ spec:
           {{- end -}}
         {{- end -}}
       {{- end }}
+    {{- if ne $host "*" }}
+    host: {{ $host | quote }}
+    {{- end }}
+  {{ end -}}
