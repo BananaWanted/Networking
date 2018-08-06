@@ -43,7 +43,7 @@ nginx-ingress:
   rbac:
     create: true
 
-external-dns:
+externalDNS:
   provider: google
   policy: sync
   txtPrefix: ext-dns-
@@ -53,9 +53,12 @@ external-dns:
     project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
     serviceAccountSecret: dns-secret
 
-cert-manager:
-
-cert-manager-testing:
+certManager:
+  ingressShim:
+    defaultIssuerName: le-issuer
+    defaultIssuerKind: Issuer
+    defaultACMEChallengeType: DNS01
+    defaultACMEDNS01ChallengeProvider: acme-dns-provider
 
 postgresTesting:
   nameOverride: postgres-testing

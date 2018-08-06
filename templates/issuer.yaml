@@ -1,0 +1,25 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: {{ .Values.certManager.ingressShim.defaultIssuerName }}
+  labels:
+    chart: {{ list .Chart.Name .Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+    release: {{ .Release.Name }}
+    testing: {{ .Values.testing | quote }}
+spec:
+  acme:
+    {{- if .Values.testing }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    {{- else }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    {{- end }}
+    privateKeySecretRef:
+      name: {{ .Values.tlsSecret }}
+    dns01:
+      providers:
+      - name: {{ .Values.certManager.ingressShim.defaultACMEDNS01ChallengeProvider }}
+        clouddns:
+          project: {{ .Values.externalDNS.google.project }}
+          serviceAccountSecretRef:
+            name: {{ .Values.externalDNS.google.serviceAccountSecret }}
+            key: credentials.json

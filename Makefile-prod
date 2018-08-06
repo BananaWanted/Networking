@@ -28,7 +28,7 @@ PROD_TLS_KEY_FILE ?=
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--set hosts="$(PROD_GCP_DNS_HOSTNAME)" \
-						--set external-dns.google.project="$(PROD_GCP_DNS_PROJECT)" \
+						--set externalDNS.google.project="$(PROD_GCP_DNS_PROJECT)" \
 						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
