@@ -11,53 +11,51 @@ PROD_GCP_DB_INSTANCE ?=
 PROD_GCP_DB_USERNAME ?=
 PROD_GCP_DB_PASSWORD ?=
 
-PROD_K8S_SECRET_DATABASE ?= database-secret
+# Static IP Settings
+PROD_GCP_IP_REGION ?=
 
 # DNS Settings
 
 PROD_GCP_DNS_KEY_FILE ?=
-# not setable. buggy
-PROD_K8S_SECRET_DNS ?= dns-secret
 
 # Ingress Settings
 
-PROD_GCP_STATIC_IP ?= static-ip
-PROD_K8S_SECRET_TLS ?= tls-secret
 PROD_TLS_CERT_FILE ?=
 PROD_TLS_KEY_FILE ?=
 
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--set tlsSecret="$(PROD_K8S_SECRET_TLS)" \
-						--set databaseSecret="$(PROD_K8S_SECRET_DATABASE)" \
-						--set staticIP="$(PROD_GCP_STATIC_IP)" \
-						--set postgres.existingSecret="$(PROD_K8S_SECRET_DATABASE)" \
-						--set postgres.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
-						--set postgres.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
-						--set postgres.instances[0].region="$(PROD_GCP_DB_REGION)"
+						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
+						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
+						--set postgres.cloudsql.instances[0].region="$(PROD_GCP_DB_REGION)" \
+						--set postgres.cloudsql.instances[0].port=5432
 
 # Targets
 
 prod-secret-database:
-	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DATABASE) \
+	$(KUBECTL) create secret generic database-secret \
 		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)" \
 		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
 		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
 
 prod-secret-tls:
-	$(KUBECTL) create secret tls $(PROD_K8S_SECRET_TLS) \
+	$(KUBECTL) create secret tls tls-secret \
 		--cert="$(PROD_TLS_CERT_FILE)" \
 		--key="$(PROD_TLS_KEY_FILE)"
 
 prod-secret-dns:
-	$(KUBECTL) create secret generic $(PROD_K8S_SECRET_DNS) \
+	$(KUBECTL) create secret generic dns-secret \
 		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
-	gcloud compute addresses create $(PROD_GCP_STATIC_IP) --global
+	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
 
-prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
+prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns
+	# prod-static-ip
+	# $(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+	# $(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+
 
 prod-helm-init:
 	kubectl create -f tiller-rbac-config.yaml

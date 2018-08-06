@@ -9,8 +9,6 @@ metadata:
   annotations:
   {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  {{- else }}
-    kubernetes.io/ingress.global-static-ip-name: {{ .Values.staticIP | quote }}
   {{- end }}
 
 spec:
