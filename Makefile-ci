@@ -21,8 +21,12 @@ ci-run:
 		kubectl logs -n kube-system $$(kubectl get pods -n kube-system -o custom-columns=:metadata.name | $(GREP) tiller) \
 		&& false)
 	$(MAKE) ci-wait-job-db-vcs
-	curl -I -X GET "$$($(MINIKUBE) service $(HELM_RELEASE_NAME)-nginx-ingress-controller --url)/generate_204" | $(GREP) '204 No Content'
-
+	RETRY_TIME=0; \
+	until curl -i "$$($(MINIKUBE) service $(HELM_RELEASE_NAME)-nginx-ingress-controller --url)/generate_204" | $(GREP) '204 No Content' || [[ $$RETRY_TIME -ge 5 ]]; do \
+		$(KUBECTL) get all; \
+		RETRY_TIME=$$(($$RETRY_TIME + 1)); \
+		sleep 5; \
+	done
 
 ci-after-success: ci-docker-push-images ci-tag-the-commit
 
@@ -46,6 +50,7 @@ ci-wait-job-%:
 	@echo waiting for job $* finished....
 	@until $(HELM) status $(HELM_RELEASE_NAME) | $(GREP) '^$(HELM_RELEASE_NAME)-$*\s+(\d+)\s+\1' 2>/dev/null; do \
 		$(KUBECTL) logs --all-containers=true -lrelease=$(HELM_RELEASE_NAME) --since=2s; \
+		sudo iptables -t nat -L; \
 		sleep 2; \
 	done
 	@echo job $* is completed.
