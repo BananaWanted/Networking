@@ -14,7 +14,7 @@ ci: ci-prepare-env ci-build ci-run ci-after-success
 
 ci-prepare-env: env-kubernetes ci-git-login ci-git-set-username-travis ci-docker-login
 	$(KUBECTL) create secret generic dns-secret \
-		--from-literal=key.json="test"
+		--from-literal=credentials.json="test"
 
 ci-build: all
 
@@ -30,6 +30,7 @@ ci-run:
 		RETRY_TIME=$$(($$RETRY_TIME + 1)); \
 		sleep 5; \
 	done
+	curl -i "$$($(MINIKUBE) service $(HELM_RELEASE_NAME)-nginx-ingress-controller --url)/generate_204" | $(GREP) '204 No Content'
 
 ci-after-success: ci-docker-push-images ci-tag-the-commit
 
