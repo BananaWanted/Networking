@@ -19,11 +19,6 @@ PROD_GCP_DNS_HOSTNAME ?=
 PROD_GCP_DNS_PROJECT ?=
 PROD_GCP_DNS_KEY_FILE ?=
 
-# Ingress Settings
-
-PROD_TLS_CERT_FILE ?=
-PROD_TLS_KEY_FILE ?=
-
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
@@ -42,11 +37,6 @@ prod-secret-database:
 		--from-file=instance-credential="$(PROD_GCP_DB_KEY_FILE)" \
 		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
 		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
-
-prod-secret-tls:
-	$(KUBECTL) create secret tls tls-secret \
-		--cert="$(PROD_TLS_CERT_FILE)" \
-		--key="$(PROD_TLS_KEY_FILE)"
 
 prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
