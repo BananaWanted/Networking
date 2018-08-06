@@ -31,11 +31,13 @@ postgres:
 
 nginx-ingress:
   controller:
+    kind: DaemonSet
     publishService:
       enabled: true # addressing https://github.com/kubernetes-incubator/external-dns/issues/223
     extraArgs:
       update-status-on-shutdown: "false"  # addressing https://github.com/kubernetes-incubator/external-dns/issues/414
     service:
+      externalTrafficPolicy: Local
       loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
   rbac:
     create: true
