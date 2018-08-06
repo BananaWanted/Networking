@@ -14,7 +14,7 @@ endif
 
 dev-env: env-kubernetes env-sqitch
 	-$(KUBECTL) create secret generic dns-secret \
-		--from-literal=key.json="test"
+		--from-literal=credentials.json="test"
 	$(MINIKUBE) addons enable dashboard
 	$(MINIKUBE) addons open dashboard
 
