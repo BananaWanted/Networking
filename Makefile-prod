@@ -11,6 +11,9 @@ PROD_GCP_DB_INSTANCE ?=
 PROD_GCP_DB_USERNAME ?=
 PROD_GCP_DB_PASSWORD ?=
 
+# Static IP Settings
+PROD_GCP_IP_REGION ?=
+
 # DNS Settings
 
 PROD_GCP_DNS_KEY_FILE ?=
@@ -46,7 +49,7 @@ prod-secret-dns:
 		--from-file=key.json="$(PROD_GCP_DNS_KEY_FILE)"
 
 prod-static-ip:
-	gcloud compute addresses create static-ip --global
+	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
 
 prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns
 	# prod-static-ip
