@@ -7,10 +7,10 @@ metadata:
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
   annotations:
+    external-dns.alpha.kubernetes.io/ttl: "60"
   {{- if .Values.testing }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   {{- end }}
-    external-dns.alpha.kubernetes.io/ttl: "60"
 
 spec:
   {{- if not .Values.testing }}

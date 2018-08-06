@@ -62,7 +62,7 @@ prod-helm-init:
 	kubectl create -f tiller-rbac-config.yaml
 	$(HELM) init --service-account tiller
 
-prod-update-dependencies:
+prod-update:
 	$(HELM) dependency update
 
 prod-install:

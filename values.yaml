@@ -31,6 +31,8 @@ postgres:
 
 nginx-ingress:
   controller:
+    publishService:
+      enabled: true # addressing https://github.com/kubernetes-incubator/external-dns/issues/223
     extraArgs:
       update-status-on-shutdown: "false"  # addressing https://github.com/kubernetes-incubator/external-dns/issues/414
     service:
@@ -41,7 +43,7 @@ nginx-ingress:
 external-dns:
   provider: google
   policy: sync
-  txtPrefix: ext-dns
+  txtPrefix: ext-dns-
   rbac:
     create: true
   google:

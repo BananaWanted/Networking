@@ -8,5 +8,8 @@ dependencies:
 - name: nginx-ingress
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 0.23.0
-digest: sha256:d3d8bbfac486092b2dbdda34a070389dbe137317ae71ea508c57239c0bedb995
-generated: 2018-08-02T21:59:13.040894462+08:00
+- name: external-dns
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.7.1
+digest: sha256:5fa21cb1f5412871b1107506382e35ee926202cbb09397ba3ad658d13247942c
+generated: 2018-08-06T14:27:58.914726383+08:00
