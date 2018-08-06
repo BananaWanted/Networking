@@ -26,6 +26,7 @@ PROD_TLS_KEY_FILE ?=
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
+						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
 						--set postgres.cloudsql.instances[0].region="$(PROD_GCP_DB_REGION)" \
@@ -50,12 +51,9 @@ prod-secret-dns:
 
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
+PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) 2> /dev/null)
 
-prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns
-	# prod-static-ip
-	# $(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-	# $(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
-
+prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
 
 prod-helm-init:
 	kubectl create -f tiller-rbac-config.yaml
