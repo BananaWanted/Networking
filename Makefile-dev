@@ -12,7 +12,7 @@ ifdef DEV_PERSIST_DB
 DEV_HELM_COMMON_FLAGS := $(DEV_HELM_COMMON_FLAGS) --set postgresTesting.persistence.enabled=true
 endif
 
-dev-env: env-kubernetes env-sqitch
+dev-env: env-kubernetes env-sqitch noerror-env-cert-manager
 	-$(KUBECTL) create secret generic dns-secret \
 		--from-literal=credentials.json="test"
 	$(MINIKUBE) addons enable dashboard

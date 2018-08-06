@@ -17,7 +17,3 @@ dependencies:
   repository: https://kubernetes-charts.storage.googleapis.com
   condition: notTesting
   alias: externalDNS
-- name: cert-manager
-  version: v0.4.0
-  repository: https://kubernetes-charts.storage.googleapis.com
-  alias: certManager

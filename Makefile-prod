@@ -46,7 +46,7 @@ prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
 PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
 
-prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
+prod-prepare: prod-secret-database prod-secret-dns prod-static-ip env-cert-manager
 
 prod-helm-init:
 	kubectl create -f tiller-rbac-config.yaml

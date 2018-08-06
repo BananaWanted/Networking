@@ -107,6 +107,14 @@ else
 endif
 SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
 
+env-cert-manager: env-helm
+	$(HELM) install --name cert-manager --namespace kube-system \
+		--set ingressShim.defaultIssuerName=default-issuer \
+		--set ingressShim.defaultIssuerKind=Issuer \
+		--set ingressShim.defaultACMEChallengeType=DNS01 \
+		--set ingressShim.defaultACMEDNS01ChallengeProvider=default-dns01-provider \
+		stable/cert-manager
+
 env-kubernetes: env-kubectl env-minikube env-helm
 	# verify kubernetes is ready for use
 	$(KUBECTL) cluster-info --request-timeout=10

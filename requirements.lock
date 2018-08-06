@@ -11,5 +11,8 @@ dependencies:
 - name: external-dns
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 0.7.1
-digest: sha256:5fa21cb1f5412871b1107506382e35ee926202cbb09397ba3ad658d13247942c
-generated: 2018-08-06T14:27:58.914726383+08:00
+- name: cert-manager
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: v0.4.0
+digest: sha256:6c322f00026eef1e0fb763cd0a6664b26ab576a7588e250f019de93ba7cfb3a8
+generated: 2018-08-06T23:32:22.923809498+08:00
