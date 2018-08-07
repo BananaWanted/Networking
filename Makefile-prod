@@ -14,21 +14,13 @@ PROD_GCP_DB_PASSWORD ?=
 # Static IP Settings
 PROD_GCP_IP_REGION ?=
 
-# ACME Settings
-PROD_ACME_EMAIL ?=
-PROD_ACME_DNS_PROJECT ?=
-
 # DNS Settings
-PROD_GCP_DNS_HOSTNAME ?=
 PROD_GCP_DNS_PROJECT ?=
 PROD_GCP_DNS_KEY_FILE ?=
 
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--set hosts="$(PROD_GCP_DNS_HOSTNAME)" \
-						--set ACME.email="$(PROD_ACME_EMAIL)" \
-						--set ACME.dns.project="$(PROD_ACME_DNS_PROJECT)" \
 						--set externalDNS.google.project="$(PROD_GCP_DNS_PROJECT)" \
 						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \

@@ -10,8 +10,15 @@ DOCKER_PASSWORD ?=
 DOCKER_BUILD_ARGS ?= --build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
 DDNS_ZONE ?= local
+ACME_EMAIL ?= acme@a.com
+ACME_DNS_PROJECT ?= acme_dns_project
+SERVICE_HOSTS ?= {*}
+
 HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG) \
-					--set appConfigs.dns.env.DDNS_ZONE=$(DDNS_ZONE)
+					--set appConfigs.dns.env.DDNS_ZONE=$(DDNS_ZONE) \
+					--set hosts="$(SERVICE_HOSTS)" \
+					--set ACME.email="$(ACME_EMAIL)" \
+					--set ACME.dns.project="$(ACME_DNS_PROJECT)"
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 
