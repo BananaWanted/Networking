@@ -13,13 +13,14 @@ spec:
     {{- else }}
     server: https://acme-v02.api.letsencrypt.org/directory
     {{- end }}
+    email: {{ .Values.ACME.email | quote }}
     privateKeySecretRef:
       name: {{ .Values.tlsSecret }}
     dns01:
       providers:
       - name: default-dns01-provider  # FIXME hard coded name
         clouddns:
-          project: {{ .Values.externalDNS.google.project }}   # FIXME borrowed value
+          project: {{ .Values.ACME.dns.project }}
           serviceAccountSecretRef:
-            name: {{ .Values.externalDNS.google.serviceAccountSecret }}  # FIXME borrowed value
-            key: credentials.json
+            name: {{ .Values.ACME.dns.secret }}
+            key: {{ .Values.ACME.dns.secretKey }}

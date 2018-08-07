@@ -20,15 +20,12 @@ databaseSecret: &databaseSecret database-secret  # secret for connecting to Clou
 hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: PROD_GCP_DNS_HOSTNAME
   - "*"
 
-postgres:
-  existingSecret: *databaseSecret
-  existingSecretKey: instance-credential
-  cloudsql:
-    instances:
-    - project: project    # ENV: PROD_GCP_DB_PROJECT
-      region: retion      # ENV: PROD_GCP_DB_REGION
-      instance: instance  # ENV: PROD_GCP_DB_INSTANCE
-      port: 5432
+ACME:
+  email: acme@a.com   # ENV: PROD_ACME_EMAIL
+  dns:
+    project: gcp-dns-project  # ENV: PROD_ACME_DNS_PROJECT
+    secret: dns-secret
+    secretKey: credentials.json
 
 nginx-ingress:
   controller:
@@ -52,6 +49,16 @@ externalDNS:
   google:
     project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
     serviceAccountSecret: dns-secret
+
+postgres:
+  existingSecret: *databaseSecret
+  existingSecretKey: instance-credential
+  cloudsql:
+    instances:
+    - project: project    # ENV: PROD_GCP_DB_PROJECT
+      region: retion      # ENV: PROD_GCP_DB_REGION
+      instance: instance  # ENV: PROD_GCP_DB_INSTANCE
+      port: 5432
 
 postgresTesting:
   nameOverride: postgres-testing

@@ -1,4 +1,3 @@
-*.tgz
 *.tar.gz
 applications/
 .travis.yml
