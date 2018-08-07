@@ -23,11 +23,14 @@ endif
 BREW = HOMEBREW_NO_AUTO_UPDATE=1 $(shell command -v brew 2> /dev/null)
 
 HELM := $(shell command -v helm 2> /dev/null)
-env-helm: env-brew env-kubectl
+env-helm: env-kubectl
 ifdef HELM
 	@echo helm ... check
 else ifeq ($(ENV_OS_NAME), Darwin)
-	$(BREW) install kubernetes-helm
+	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-rc.2-darwin-amd64.tar.gz
+	tar -xzf helm.tar.gz
+	sudo mv darwin-amd64/helm /usr/local/bin/
+	rm -rf darwin-amd64 helm.tar.gz
 	helm --help > /dev/null
 else
 	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-rc.2-linux-amd64.tar.gz
