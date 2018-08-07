@@ -40,6 +40,7 @@ nginx-ingress:
       loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
 
 externalDNS:
+  nameOverride: external-dns
   provider: google
   policy: sync
   txtPrefix: ext-dns-
