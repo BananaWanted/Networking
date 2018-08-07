@@ -6,7 +6,7 @@ DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--set testing=true,notTesting=false \
 						--set nginx-ingress.controller.service.type=NodePort \
 						--set nginx-ingress.controller.service.nodePorts.http=30001 \
-						--set nginx-ingress.controller.service.enableHttps=false \
+						--set nginx-ingress.controller.service.nodePorts.https=30002 \
 						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
 
 ifdef DEV_PERSIST_DB
@@ -58,3 +58,6 @@ dev-drd:
 
 dev-docker-%:
 	eval $$(minikube docker-env) && docker $*
+
+dev-open:
+	$(MINIKUBE) service release-local-nginx-ingress-controller --url | cut -c 8- | xargs -n 2 echo | awk '{print "http://"$$1"/server-info"; print "https://"$$2"/server-info"}' | xargs -n 1 open
