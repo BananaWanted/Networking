@@ -1,6 +1,5 @@
 # Everything defined in this file have prefix CI_ or (ci-)
 CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--wait \
 						--set testing=true,notTesting=false \
 						--set nginx-ingress.controller.service.externalTrafficPolicy=null \
 						--set nginx-ingress.controller.service.loadBalancerIP=null \
