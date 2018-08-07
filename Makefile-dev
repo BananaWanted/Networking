@@ -2,7 +2,7 @@
 DEV_PERSIST_DB ?=
 DEV_DNS_KEY_FILE ?= key.json
 DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--wait --debug \
+						--debug \
 						--set testing=true,notTesting=false \
 						--set nginx-ingress.controller.service.type=NodePort \
 						--set nginx-ingress.controller.service.nodePorts.http=30001 \
@@ -49,7 +49,7 @@ dev-purge-all:
 dev-reinstall: noerror-dev-purge sleep-5 dev-install
 
 dev-upgrade:
-	$(HELM) upgrade $(DEV_HELM_COMMON_FLAGS) --force --recreate-pods --install $(HELM_RELEASE_NAME) .
+	$(HELM) upgrade --reset-values --force $(DEV_HELM_COMMON_FLAGS) $(HELM_RELEASE_NAME) .
 
 dev-status:
 	$(HELM) status $(HELM_RELEASE_NAME)
