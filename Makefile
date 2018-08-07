@@ -12,6 +12,7 @@ GITHUB_TOKEN ?=
 DDNS_ZONE ?= local
 ACME_EMAIL ?= acme@a.com
 ACME_DNS_PROJECT ?= acme_dns_project
+# TODO merge ACME_DNS_PROJECT and PROD_GCP_DNS_PROJECT
 SERVICE_HOSTS ?= {*}
 
 HELM_COMMON_FLAGS ?= --set dockerRegistry=$(DOCKER_REGISTRY),buildTag=$(BUILD_TAG) \
