@@ -23,14 +23,17 @@ endif
 BREW = HOMEBREW_NO_AUTO_UPDATE=1 $(shell command -v brew 2> /dev/null)
 
 HELM := $(shell command -v helm 2> /dev/null)
-env-helm: env-brew env-kubectl
+env-helm: env-kubectl
 ifdef HELM
 	@echo helm ... check
 else ifeq ($(ENV_OS_NAME), Darwin)
-	$(BREW) install kubernetes-helm
+	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-rc.2-darwin-amd64.tar.gz
+	tar -xzf helm.tar.gz
+	sudo mv darwin-amd64/helm /usr/local/bin/
+	rm -rf darwin-amd64 helm.tar.gz
 	helm --help > /dev/null
 else
-	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz
+	curl -Lo helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-rc.2-linux-amd64.tar.gz
 	tar -xzf helm.tar.gz
 	sudo mv linux-amd64/helm /usr/local/bin/
 	rm -rf linux-amd64 helm.tar.gz
@@ -69,20 +72,13 @@ else ifeq ($(ENV_OS_NAME), Darwin)
 	sudo chown root:wheel /usr/local/bin/docker-machine-driver-hyperkit
 	sudo chmod u+s /usr/local/bin/docker-machine-driver-hyperkit
 
-	minikube --alsologtostderr config set kubernetes-version v1.11.1
-	minikube --alsologtostderr config set vm-driver hyperkit
-	minikube --alsologtostderr config set WantReportErrorPrompt false
-	minikube --alsologtostderr start --vm-driver hyperkit
+	minikube --alsologtostderr start --vm-driver hyperkit --kubernetes-version v1.10.6
 else
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64
 	chmod +x minikube
 	sudo mv minikube /usr/local/bin/
-	minikube --alsologtostderr config set kubernetes-version v1.10.5
-	minikube --alsologtostderr config set vm-driver none
-	minikube --alsologtostderr config set bootstrapper kubeadm
-	minikube --alsologtostderr config set WantReportErrorPrompt false
-	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none
-	minikube --alsologtostderr update-context
+
+	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none --kubernetes-version v1.10.6
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
@@ -94,7 +90,6 @@ endif
 	if minikube addons list | grep 'kube-dns: disabled'; then \
 		sudo minikube --alsologtostderr addons enable kube-dns; \
 	fi
-	minikube --alsologtostderr config view
 MINIKUBE = $(shell command -v minikube 2> /dev/null) --alsologtostderr
 
 SQITCH := $(shell docker image inspect $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) 2> /dev/null)
@@ -106,6 +101,18 @@ else
 	docker image inspect $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) > /dev/null
 endif
 SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
+
+env-cert-manager: env-helm
+	$(HELM) install --name cert-manager --namespace kube-system \
+		--set ingressShim.defaultIssuerName=default-issuer \
+		--set ingressShim.defaultIssuerKind=Issuer \
+		--set ingressShim.defaultACMEChallengeType=DNS01 \
+		--set ingressShim.defaultACMEDNS01ChallengeProvider=default-dns01-provider \
+		stable/cert-manager
+	# wait for booting
+	until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
+		sleep 2; \
+	done
 
 env-kubernetes: env-kubectl env-minikube env-helm
 	# verify kubernetes is ready for use
