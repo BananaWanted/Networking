@@ -34,6 +34,7 @@ nginx-ingress:
       enabled: true # addressing https://github.com/kubernetes-incubator/external-dns/issues/223
     extraArgs:
       update-status-on-shutdown: "false"  # addressing https://github.com/kubernetes-incubator/external-dns/issues/414
+      # default-ssl-certificate: default/tls-secret # overriding default cert, NO FAKE!
     service:
       externalTrafficPolicy: Local
       loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP

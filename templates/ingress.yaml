@@ -7,6 +7,9 @@ metadata:
     release: {{ .Release.Name }}
     testing: {{ .Values.testing | quote }}
   annotations:
+    certmanager.k8s.io/issuer: default-issuer
+    certmanager.k8s.io/acme-challenge-type: dns01
+    certmanager.k8s.io/acme-dns01-provider: default-dns01-provider
     kubernetes.io/ingress.class: nginx
     # external-dns.alpha.kubernetes.io/ttl: "60"  # bug: https://github.com/kubernetes-incubator/external-dns/issues/467
   {{- if .Values.testing }}
@@ -18,6 +21,12 @@ metadata:
 spec:
   tls:
   - secretName: {{ .Values.tlsSecret }}
+    hosts:
+    {{- range $i, $host:= .Values.hosts }}
+      {{- if ne $host "*" }}
+    - {{ $host | quote}}
+      {{- end }}
+    {{- end }}
   rules:
   {{- range $i, $host := .Values.hosts }}
   - http:
