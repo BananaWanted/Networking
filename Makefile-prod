@@ -60,6 +60,9 @@ prod-install-dryrun:
 	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run --debug .
 
 prod-upgrade:
+	$(MAKE) prod-install-dryrun
+	@echo confirm?
+	@read _
 	$(HELM) upgrade --reset-values --force $(PROD_HELM_COMMON_FLAGS) $(HELM_RELEASE_NAME) .
 
 prod-status:
