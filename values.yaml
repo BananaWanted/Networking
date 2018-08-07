@@ -38,8 +38,6 @@ nginx-ingress:
     service:
       externalTrafficPolicy: Local
       loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
-  rbac:
-    create: true
 
 externalDNS:
   provider: google
