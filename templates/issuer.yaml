@@ -15,7 +15,7 @@ spec:
     {{- end }}
     email: {{ .Values.ACME.email | quote }}
     privateKeySecretRef:
-      name: {{ .Values.tlsSecret }}
+      name: default-issuer-secret
     dns01:
       providers:
       - name: default-dns01-provider  # FIXME hard coded name
