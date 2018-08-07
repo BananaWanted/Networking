@@ -103,15 +103,11 @@ endif
 SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
 
 env-cert-manager: env-helm
-	$(HELM) install --name cert-manager --namespace kube-system \
-		--set ingressShim.defaultIssuerName=default-issuer \
-		--set ingressShim.defaultIssuerKind=Issuer \
-		--set ingressShim.defaultACMEChallengeType=DNS01 \
-		--set ingressShim.defaultACMEDNS01ChallengeProvider=default-dns01-provider \
-		stable/cert-manager
+	$(HELM) install --name cert-manager --namespace kube-system stable/cert-manager
 	# wait for booting
-	until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
+	@until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
 		sleep 2; \
+		echo keep waiting...; \
 	done
 
 env-kubernetes: env-kubectl env-minikube env-helm
@@ -126,4 +122,3 @@ env-destroy-minikube:
 	@echo destroying minikube cluster, press enter to confirm...
 	@read _
 	$(MINIKUBE) delete 
-
