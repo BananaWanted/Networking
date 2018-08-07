@@ -17,8 +17,37 @@ dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
 databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database.
-hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: PROD_GCP_DNS_HOSTNAME
+hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: SERVICE_HOSTS
   - "*"
+
+ACME:
+  email: acme@a.com   # ENV: ACME_EMAIL
+  dns:
+    project: gcp-dns-project  # ENV: ACME_DNS_PROJECT
+    secret: dns-secret
+    secretKey: credentials.json
+
+nginx-ingress:
+  controller:
+    kind: DaemonSet
+    publishService:
+      enabled: true # addressing https://github.com/kubernetes-incubator/external-dns/issues/223
+    extraArgs:
+      update-status-on-shutdown: "false"  # addressing https://github.com/kubernetes-incubator/external-dns/issues/414
+      # default-ssl-certificate: default/tls-secret # overriding default cert, NO FAKE!
+    service:
+      externalTrafficPolicy: Local
+      loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
+
+externalDNS:
+  provider: google
+  policy: sync
+  txtPrefix: ext-dns-
+  rbac:
+    create: true
+  google:
+    project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
+    serviceAccountSecret: dns-secret
 
 postgres:
   existingSecret: *databaseSecret
@@ -29,30 +58,6 @@ postgres:
       region: retion      # ENV: PROD_GCP_DB_REGION
       instance: instance  # ENV: PROD_GCP_DB_INSTANCE
       port: 5432
-
-nginx-ingress:
-  controller:
-    kind: DaemonSet
-    publishService:
-      enabled: true # addressing https://github.com/kubernetes-incubator/external-dns/issues/223
-    extraArgs:
-      update-status-on-shutdown: "false"  # addressing https://github.com/kubernetes-incubator/external-dns/issues/414
-    service:
-      externalTrafficPolicy: Local
-      loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
-  rbac:
-    create: true
-
-external-dns:
-  provider: google
-  policy: sync
-  txtPrefix: ext-dns-
-  rbac:
-    create: true
-  google:
-    project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
-    serviceAccountSecret: dns-secret
-
 
 postgresTesting:
   nameOverride: postgres-testing
