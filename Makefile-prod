@@ -15,20 +15,13 @@ PROD_GCP_DB_PASSWORD ?=
 PROD_GCP_IP_REGION ?=
 
 # DNS Settings
-PROD_GCP_DNS_HOSTNAME ?=
 PROD_GCP_DNS_PROJECT ?=
 PROD_GCP_DNS_KEY_FILE ?=
-
-# Ingress Settings
-
-PROD_TLS_CERT_FILE ?=
-PROD_TLS_KEY_FILE ?=
 
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--set hosts="$(PROD_GCP_DNS_HOSTNAME)" \
-						--set external-dns.google.project="$(PROD_GCP_DNS_PROJECT)" \
+						--set externalDNS.google.project="$(PROD_GCP_DNS_PROJECT)" \
 						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
@@ -43,11 +36,6 @@ prod-secret-database:
 		--from-literal=username="$(PROD_GCP_DB_USERNAME)" \
 		--from-literal=password="$(PROD_GCP_DB_PASSWORD)"
 
-prod-secret-tls:
-	$(KUBECTL) create secret tls tls-secret \
-		--cert="$(PROD_TLS_CERT_FILE)" \
-		--key="$(PROD_TLS_KEY_FILE)"
-
 prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
 		--from-file=credentials.json="$(PROD_GCP_DNS_KEY_FILE)"
@@ -56,7 +44,7 @@ prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
 PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
 
-prod-prepare: prod-secret-database prod-secret-tls prod-secret-dns prod-static-ip
+prod-prepare: prod-secret-database prod-secret-dns prod-static-ip env-cert-manager
 
 prod-helm-init:
 	kubectl create -f tiller-rbac-config.yaml

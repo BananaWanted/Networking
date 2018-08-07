@@ -16,10 +16,8 @@ metadata:
   {{- end }}
 
 spec:
-  {{- if not .Values.testing }}
   tls:
   - secretName: {{ .Values.tlsSecret }}
-  {{- end }}
   rules:
   {{- range $i, $host := .Values.hosts }}
   - http:

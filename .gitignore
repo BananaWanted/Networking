@@ -1,4 +1,5 @@
-charts/*.tgz
+*.tgz
+*.tar.gz
 .vscode
 .DS_Store
 .idea

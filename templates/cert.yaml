@@ -1,0 +1,29 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: default-cert
+  labels:
+    chart: {{ list .Chart.Name .Chart.Version | join "-" | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+    release: {{ .Release.Name }}
+    testing: {{ .Values.testing | quote }}
+spec:
+  secretName: {{ .Values.tlsSecret }}
+  dnsNames:
+  {{- range $i, $host:= .Values.hosts }}
+    {{- if ne $host "*" }}
+  - {{ $host | quote}}
+    {{- end }}
+  {{- end }}
+  acme:
+    config:
+    - dns01:
+        provider: default-dns01-provider
+      domains:
+      {{- range $i, $host:= .Values.hosts }}
+        {{- if ne $host "*" }}
+      - {{ $host | quote}}
+        {{- end }}
+      {{- end }}
+  issuerRef:
+    name: default-issuer
+    kind: Issuer

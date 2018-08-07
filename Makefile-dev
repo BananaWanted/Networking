@@ -1,20 +1,22 @@
 # Everything defined in this file have prefix DEV_ or (dev-)
 DEV_PERSIST_DB ?=
+DEV_DNS_KEY_FILE ?= key.json
 DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--wait --debug \
 						--set testing=true,notTesting=false \
 						--set nginx-ingress.controller.service.type=NodePort \
 						--set nginx-ingress.controller.service.nodePorts.http=30001 \
-						--set nginx-ingress.controller.service.enableHttps=false \
+						--set nginx-ingress.controller.service.nodePorts.https=30002 \
 						$(addprefix --set appConfigs., $(addsuffix .replicas=1 , $(APPS)))
 
 ifdef DEV_PERSIST_DB
 DEV_HELM_COMMON_FLAGS := $(DEV_HELM_COMMON_FLAGS) --set postgresTesting.persistence.enabled=true
 endif
 
-dev-env: env-kubernetes env-sqitch
-	-$(KUBECTL) create secret generic dns-secret \
-		--from-literal=credentials.json="test"
+dev-env: env-kubernetes env-sqitch noerror-env-cert-manager
+	-$(KUBECTL) delete secret dns-secret
+	-$(KUBECTL) create secret generic dns-secret --from-file=credentials.json="$(DEV_DNS_KEY_FILE)"
+	-$(KUBECTL) create secret generic dns-secret --from-literal=credentials.json="test"
 	$(MINIKUBE) addons enable dashboard
 	$(MINIKUBE) addons open dashboard
 
@@ -56,3 +58,6 @@ dev-drd:
 
 dev-docker-%:
 	eval $$(minikube docker-env) && docker $*
+
+dev-open:
+	$(MINIKUBE) service release-local-nginx-ingress-controller --url | cut -c 8- | xargs -n 2 echo | awk '{print "http://"$$1"/server-info"; print "https://"$$2"/server-info"}' | xargs -n 1 open
