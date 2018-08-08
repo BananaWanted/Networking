@@ -3,6 +3,9 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/dns:${BUILD_TAG}-test
 
+# Disable ORM loading.
+ENV APP_ORM=""
+
 # Add tests files
 COPY requirements.txt requirements-test.txt ./
 COPY tests tests

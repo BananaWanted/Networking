@@ -4,8 +4,7 @@ FROM python:alpine
 ENV PYTHONPATH="/workspace" WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
 # app env
 ENV APP_BLUEPRINT="blueprint.bp" APP_ORM="orm.db"
-# testing env
-ENV TEST_IT="" CMD_RUN_TEST="pytest -sv --color=yes --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb tests"
+ENV RUN_TEST="pytest -sv --color=yes tests" DEBUG_FLAGS="--pdbcls=IPython.terminal.debugger:TerminalPdb --pdb"
 
 EXPOSE 80
 WORKDIR /workspace
@@ -20,8 +19,6 @@ RUN apk update \
     && pip install -r requirements.txt \
     && apk del --purge build-dependencies \
     && rm -f /requirements.txt
-
-ENTRYPOINT if [[ -n ${TEST_IT} ]]; then ${CMD_RUN_TEST}; else exec $@; fi
 
 CMD ["/usr/local/bin/gunicorn", \
     "--worker-class", "sanic.worker.GunicornWorker", \

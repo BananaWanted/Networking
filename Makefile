@@ -83,7 +83,7 @@ endif
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 
 test-app-%:
-	# docker run --rm -it -e TEST_IT=yes $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
+	docker run --rm -it $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test '$${RUN_TEST}'
 	docker run --rm -it $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 
 sleep-%:

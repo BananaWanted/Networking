@@ -2,6 +2,6 @@
 """
 This file is only for running sanic image test. Not included in prod image.
 """
-from gino import Gino
+from gino.ext.sanic import Gino
 
 db = Gino()
