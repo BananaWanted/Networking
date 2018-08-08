@@ -2,6 +2,6 @@
 """
 This file is only for running sanic image test. Not included in prod image.
 """
-from sanic import Blueprint
+from gino import Gino
 
-bp = Blueprint('bp', '/bp')
+db = Gino()

@@ -1,6 +1,6 @@
 FROM python:alpine
 
-ENV WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
+ENV APP_BLUEPRINT="blueprint.bp" APP_ORM="orm.db" WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
 EXPOSE 80
 
 WORKDIR /workspace

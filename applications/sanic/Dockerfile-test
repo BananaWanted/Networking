@@ -7,7 +7,7 @@ ENV TEST_IT="" CMD_RUN_TEST="pytest -sv tests"
 ENTRYPOINT if [[ -n ${TEST_IT} ]]; do ${CMD_RUN_TEST}; else exec $@; fi
 
 # Add tests files
-COPY tests requirements.txt requirements-test.txt ./
+COPY blueprint.py orm.py tests requirements.txt requirements-test.txt ./
 
 # Install dependencies, no cleanup
 RUN pip install -r requirements-test.txt

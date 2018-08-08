@@ -1,7 +1,7 @@
 # Template Dockerfile for All Sanic Based Testing Apps
 ARG DOCKER_REGISTRY
 ARG BUILD_TAG
-FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}-test
+FROM ${DOCKER_REGISTRY}/XXX:${BUILD_TAG}-test
 
 # Add tests files
 COPY tests requirements.txt requirements-test.txt ./
