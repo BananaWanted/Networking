@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-from sanic import Sanic
+from sanic import Blueprint
 from sanic.request import Request
-from sanic.response import json, text
+from sanic.response import json
 
-app = Sanic()
+bp = Blueprint('misc', '/')
 
 
-@app.route("/generate_204")
+@bp.route("/generate_204")
 async def generate_204(request):
     return json(None, 204)
 
 
-@app.route("/server-info")
+@bp.route("/server-info")
 async def server_info(request: Request):
     fetch_keys = [
         "json", "token", "form",
@@ -43,12 +43,3 @@ async def server_info(request: Request):
         "url": request.url,
         "headers": request.headers,
     })
-
-
-@app.route("/")
-def health_check(request):
-    return text("ok")
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
