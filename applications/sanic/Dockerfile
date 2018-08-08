@@ -1,8 +1,13 @@
 FROM python:alpine
 
-ENV APP_BLUEPRINT="blueprint.bp" APP_ORM="orm.db" WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
-EXPOSE 80
+# system env
+ENV PYTHONPATH="/workspace" WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
+# app env
+ENV APP_BLUEPRINT="blueprint.bp" APP_ORM="orm.db"
+# testing env
+ENV TEST_IT="" CMD_RUN_TEST="pytest -sv --color=yes --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb tests"
 
+EXPOSE 80
 WORKDIR /workspace
 
 # Add files whiches are required for production.
@@ -15,6 +20,8 @@ RUN apk update \
     && pip install -r requirements.txt \
     && apk del --purge build-dependencies \
     && rm -f /requirements.txt
+
+ENTRYPOINT if [[ -n ${TEST_IT} ]]; then ${CMD_RUN_TEST}; else exec $@; fi
 
 CMD ["/usr/local/bin/gunicorn", \
     "--worker-class", "sanic.worker.GunicornWorker", \

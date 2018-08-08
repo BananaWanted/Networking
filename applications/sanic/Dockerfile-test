@@ -2,12 +2,9 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
-# Add a switch & entrypoint for running testing in this container
-ENV TEST_IT="" CMD_RUN_TEST="pytest -sv tests"
-ENTRYPOINT if [[ -n ${TEST_IT} ]]; do ${CMD_RUN_TEST}; else exec $@; fi
-
 # Add tests files
-COPY blueprint.py orm.py tests requirements.txt requirements-test.txt ./
+COPY blueprint.py orm.py requirements.txt requirements-test.txt ./
+COPY tests tests
 
 # Install dependencies, no cleanup
 RUN pip install -r requirements-test.txt

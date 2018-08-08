@@ -55,6 +55,7 @@ $(APPS) $(BASE_APPS):
 			$(MAKE) docker-retag-app-$@; \
 		fi; \
 	fi
+	$(MAKE) test-app-$@
 
 docker-build-app-%:
 	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
@@ -80,6 +81,10 @@ endif
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
 	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
+
+test-app-%:
+	# docker run --rm -it -e TEST_IT=yes $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
+	docker run --rm -it $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test
 
 sleep-%:
 	sleep $*
