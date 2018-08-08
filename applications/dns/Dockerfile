@@ -1,1 +1,1 @@
-../sanic/Dockerfile-apps
+../sanic/app-base.dockerfile
