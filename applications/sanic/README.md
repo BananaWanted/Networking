@@ -1,8 +1,8 @@
 # Sanic Base Image
 
 ## Getting Started
-- Copy `app-base.dockerfile` as `Dockerfile` to your app dir
-- Copy `app-test-base.dockerfile` as `Dockerfile-test` to your app dir
+- Copy `app-base/Dockerfile` to your app dir
+- Copy `app-base/Dockerfile-test` to your app dir
 - Copy `blueprint.py` to your app dir
 - Copy `orm.py` to your app dir
 - Create file `requirements.txt`
