@@ -1,1 +1,1 @@
-../sanic/app-test.dockerfile
+../sanic/app-test-base.dockerfile
