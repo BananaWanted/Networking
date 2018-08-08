@@ -1,1 +1,14 @@
-../sanic/app-test-base.dockerfile
+# Template Dockerfile for All Sanic Based Testing Apps
+ARG DOCKER_REGISTRY
+ARG BUILD_TAG
+FROM ${DOCKER_REGISTRY}/auth:${BUILD_TAG}
+
+# Disable ORM loading.
+ENV APP_ORM=""
+
+# Add tests files
+COPY requirements.txt requirements-test.txt ./
+COPY tests tests
+
+# Install dependencies, no cleanup
+RUN pip install -r requirements-test.txt
