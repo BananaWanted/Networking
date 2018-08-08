@@ -5,8 +5,8 @@
 - Copy `app-test-base.dockerfile` as `Dockerfile-test` to your app dir
 - Copy `blueprint.py` to your app dir
 - Copy `orm.py` to your app dir
-- Create file `requirement.txt`
-- Create file `requirement-test.txt`
+- Create file `requirements.txt`
+- Create file `requirements-test.txt`
 - Create folder `tests`
 
 ## Packages included
