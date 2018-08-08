@@ -1,7 +1,7 @@
 # Template Dockerfile for All Sanic Based Testing Apps
 ARG DOCKER_REGISTRY
 ARG BUILD_TAG
-FROM ${DOCKER_REGISTRY}/dns:${BUILD_TAG}-test
+FROM ${DOCKER_REGISTRY}/dns:${BUILD_TAG}
 
 # Disable ORM loading.
 ENV APP_ORM=""

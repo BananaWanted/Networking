@@ -4,6 +4,7 @@ FROM python:alpine
 ENV PYTHONPATH="/workspace" WEB_CONCURRENCY=4 LANG=C.UTF-8 TERM=dumb
 # app env
 ENV APP_BLUEPRINT="blueprint.bp" APP_ORM="orm.db"
+# testing env
 ENV RUN_TEST="pytest -sv --color=yes tests" DEBUG_FLAGS="--pdbcls=IPython.terminal.debugger:TerminalPdb --pdb"
 
 EXPOSE 80

@@ -2,7 +2,7 @@
 # Remember to replace XXX with your app's name
 ARG DOCKER_REGISTRY
 ARG BUILD_TAG
-FROM ${DOCKER_REGISTRY}/XXX:${BUILD_TAG}-test
+FROM ${DOCKER_REGISTRY}/XXX:${BUILD_TAG}
 
 # Disable ORM loading.
 ENV APP_ORM=""
