@@ -25,6 +25,10 @@ HELM_COMMON_FLAGS ?= --wait \
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 
 all: $(APPS)
+	# After a full rebuilding, bump up the Chart version.
+	# This operation is safe to fail.
+	-$(HELM) local-chart-version bump -s patch -c .
+
 
 $(APPS): $(BASE_APPS)
 
