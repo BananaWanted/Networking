@@ -6,7 +6,66 @@ from sanic import Sanic, Blueprint
 from sanic.request import Request
 from sanic.response import text
 
-app = Sanic()
+
+class _PatchedRequest(Request):
+    @property
+    def scheme(self):
+        forwarded_proto = self.headers.get('x-forwarded-proto') or self.headers.get('x-scheme')
+        if forwarded_proto:
+            return forwarded_proto
+        else:
+            return super(_PatchedRequest, self).scheme
+
+    @property
+    def host(self):
+        forwarded_host = self.headers.get('host')
+        if forwarded_host:
+            return forwarded_host
+        else:
+            return super(_PatchedRequest, self).host
+
+    @property
+    def server_port(self):
+        # new from original
+        forwarded_port = self.headers.get('x-forwarded-port')
+        if forwarded_port:
+            return int(forwarded_port)
+        else:
+            _, port = self.transport.get_extra_info('sockname')
+            return port
+
+    # TODO leverage x-original-uri
+
+    def url_for(self, view_name, **kwargs):
+        # new from original
+        return self.app.url_for(
+            view_name,
+            _request=self,
+            **kwargs
+        )
+
+
+class _PatchedSanic(Sanic):
+    def url_for(self, view_name: str, _request: _PatchedRequest, **kwargs):
+        scheme = _request.scheme
+        host = _request.host
+        port = _request.server_port
+
+        if (scheme.lower() in ('http', 'ws') and port == 80) or (scheme.lower() in ('https', 'wss') and port == 443):
+            netloc = host
+        else:
+            netloc = f"{host}:{port}"
+
+        return super(_PatchedSanic, self).url_for(
+            view_name,
+            _external=False,    # external is only for extracting _scheme from _server. we do it manually.
+            _scheme=scheme,
+            _server=netloc,
+            **kwargs,
+        )
+
+
+app = _PatchedSanic(request_class=_PatchedRequest)
 
 # Set testing mode
 if app.config.get('TESTING'):
