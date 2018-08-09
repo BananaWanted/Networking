@@ -2,6 +2,12 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
-COPY . /workspace
-RUN pip install -r requirements-test.txt \
-    && rm -rf *
+# Disable ORM loading.
+ENV APP_ORM=""
+
+# Add tests files
+COPY blueprint.py orm.py requirements.txt requirements-test.txt ./
+COPY tests tests
+
+# Install dependencies, no cleanup
+RUN pip install -r requirements-test.txt
