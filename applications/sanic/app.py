@@ -58,7 +58,7 @@ class _PatchedSanic(Sanic):
 
         return super(_PatchedSanic, self).url_for(
             view_name,
-            _external=False,    # external is only for extracting _scheme from _server. we do it manually.
+            _external=True,
             _scheme=scheme,
             _server=netloc,
             **kwargs,
