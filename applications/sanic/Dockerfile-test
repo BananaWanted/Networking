@@ -4,7 +4,7 @@ FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
 # testing env
 ENV RUN_TEST pytest -sv --color=yes tests
-ENV TEST_STAGE_BUILD -m "stage_build"
+ENV TEST_STAGE_BUILD -m "not needs_db"
 ENV TEST_STAGE_DEBUG --pdbcls=IPython.terminal.debugger:TerminalPdb --pdb
 
 # Add tests files
