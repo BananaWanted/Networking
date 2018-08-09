@@ -25,6 +25,10 @@ HELM_COMMON_FLAGS ?= --wait \
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 
 all: $(APPS)
+	# After a full rebuilding, bump up the Chart version.
+	# This operation is safe to fail.
+	-$(HELM) local-chart-version bump -s patch -c .
+
 
 $(APPS): $(BASE_APPS)
 
@@ -55,6 +59,7 @@ $(APPS) $(BASE_APPS):
 			$(MAKE) docker-retag-app-$@; \
 		fi; \
 	fi
+	$(MAKE) test-app-$@
 
 docker-build-app-%:
 	docker build $(DOCKER_BUILD_ARGS) -t $(DOCKER_REGISTRY)/$*:$(BUILD_TAG) -f applications/$*/Dockerfile applications/$*
@@ -80,6 +85,16 @@ endif
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)
 	docker tag $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
+
+test-app-%:
+	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true -e TEST_STAGE=BUILD \
+		$(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test \
+		sh -c '$${RUN_TEST}'
+
+debug-app-%:
+	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true \
+		$(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test \
+		sh -c '$${RUN_TEST} $${DEBUG_FLAGS}'
 
 sleep-%:
 	sleep $*

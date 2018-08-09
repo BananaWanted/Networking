@@ -2,4 +2,7 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sqitch:${BUILD_TAG}
 
+# testing env
+ENV RUN_TEST echo no testing for sqitch based apps ... skipped
+
 # Currently nothing to do with this image. Simple retag to non-testing image.

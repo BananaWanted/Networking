@@ -39,6 +39,7 @@ else
 	rm -rf linux-amd64 helm.tar.gz
 	helm --help > /dev/null
 endif
+	-helm plugin install https://github.com/mbenabda/helm-local-chart-version
 HELM = $(shell command -v helm 2> /dev/null)
 
 KUBECTL := $(shell command -v kubectl 2> /dev/null)
