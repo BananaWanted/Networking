@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+"""
+This file is only for running sanic image test. Not included in prod image.
+"""
 from sanic import Blueprint
 
-from ddns.ddns_report import DDNSReportView
-from ddns.ddns_setup import DDNSSetupView
+from views.ddns_report import DDNSReportView
+from views.ddns_setup import DDNSSetupView
 
 bp = Blueprint('ddns', '/ddns')
 
