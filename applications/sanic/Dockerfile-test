@@ -4,8 +4,7 @@ FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
 # testing env
 ENV RUN_TEST pytest -sv --color=yes tests
-ENV TEST_STAGE_BUILD -m "not needs_db"
-ENV TEST_STAGE_DEBUG --pdbcls=IPython.terminal.debugger:TerminalPdb --pdb
+ENV DEBUG_FLAGS --pdbcls=IPython.terminal.debugger:TerminalPdb --pdb
 
 # Add tests files
 COPY blueprint.py orm.py requirements.txt requirements-test.txt ./

@@ -83,10 +83,14 @@ endif
 	docker push $(DOCKER_REGISTRY)/$*:$(CURRENT_BRANCH)-test
 
 test-app-%:
-	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test sh -c '$${RUN_TEST} $${TEST_STAGE_BUILD}'
+	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true -e TEST_STAGE=BUILD \
+		$(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test \
+		sh -c '$${RUN_TEST}'
 
 debug-app-%:
-	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true $(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test sh -c '$${RUN_TEST} $${TEST_STAGE_DEBUG}'
+	docker run --rm -it -e TESTING=true -e SANIC_TESTING=true \
+		$(DOCKER_REGISTRY)/$*:$(BUILD_TAG)-test \
+		sh -c '$${RUN_TEST} $${DEBUG_FLAGS}'
 
 sleep-%:
 	sleep $*
