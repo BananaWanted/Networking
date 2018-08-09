@@ -2,6 +2,13 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
-COPY . /workspace
-RUN pip install -r requirements-test.txt \
-    && rm -rf *
+# testing env
+ENV RUN_TEST pytest -sv --color=yes tests
+ENV DEBUG_FLAGS --pdbcls=IPython.terminal.debugger:TerminalPdb --pdb
+
+# Add tests files
+COPY blueprint.py orm.py requirements.txt requirements-test.txt ./
+COPY tests tests
+
+# Install dependencies, no cleanup
+RUN pip install -r requirements-test.txt
