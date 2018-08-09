@@ -3,6 +3,9 @@ ARG DOCKER_REGISTRY
 ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}-test
 
+# Remove files used by from sanic testing
+RUN rm -rf blueprint.py orm.py requirements.txt requirements-test.txt tests
+
 # Add everything of the app
 COPY blueprint.py orm.py requirements.txt requirements-test.txt ./
 COPY tests tests
