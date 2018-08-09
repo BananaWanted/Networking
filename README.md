@@ -11,3 +11,5 @@ A Set of Networking Services
 - [ ] figure out an aaa solution (maybe the `auth` service, or something else)
 - [x] run unit test
 - [ ] run integration test
+- [ ] setup monitoring
+- [ ] setup alerting
