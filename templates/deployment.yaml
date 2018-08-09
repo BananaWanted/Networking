@@ -37,6 +37,14 @@ spec:
           {{- end }}
           {{- include "Networking.App.EnvSection" (list $app $) | indent 10 }}
           {{- include "Networking.App.VolumeMounts" (list $app $) | indent 10 }}
+          {{- if $appConfig.tcpPorts }}
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: /status
+              port: {{ index $appConfig.tcpPorts 0 }}
+          {{- end }}
 ---
 {{- end }}
 {{- end }}
