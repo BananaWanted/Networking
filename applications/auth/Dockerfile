@@ -4,7 +4,8 @@ ARG BUILD_TAG
 FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
 # Add the default entrypoint & requirements of the app
-COPY blueprint.py views.py orm.py requirements.txt ./
+COPY blueprint.py orm.py requirements.txt ./
+COPY views.py ./
 
 # Install dependencies & cleanup
 RUN pip install -r requirements.txt \

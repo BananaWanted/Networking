@@ -5,6 +5,7 @@ FROM ${DOCKER_REGISTRY}/sanic:${BUILD_TAG}
 
 # Add the default entrypoint & requirements of the app
 COPY blueprint.py orm.py requirements.txt ./
+# COPY <more> ./
 
 # Install dependencies & cleanup
 RUN pip install -r requirements.txt \
