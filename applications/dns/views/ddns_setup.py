@@ -23,12 +23,9 @@ class DDNSSetupView(HTTPMethodView):
             except ForeignKeyViolationError:
                 raise InvalidUsage("invalid user_id")
 
-            report_url = request.app.url_for(
+            report_url = request.url_for(
                 'ddns.DDNSReportView',
                 secret_id=record.secret_id,
-                _external=True,
-                _scheme=request.scheme,
-                _server=request.host,
             )
             cname_host = "{}.{}".format(record.public_id, request.app.config.DDNS_ZONE)
 
