@@ -67,3 +67,14 @@ prod-upgrade:
 
 prod-status:
 	$(HELM) status $(HELM_RELEASE_NAME)
+
+prod-sql-connect:
+	export CONTAINER=$$(docker run --rm -d \
+		-v "$(PROD_GCP_DB_KEY_FILE)":/config:ro \
+		-p 127.0.0.1:5432:5432 \
+		gcr.io/cloudsql-docker/gce-proxy:1.11 \
+		/cloud_sql_proxy -credential_file=/config \
+			-instances=$(PROD_GCP_DB_PROJECT):$(PROD_GCP_DB_REGION):$(PROD_GCP_DB_INSTANCE)=tcp:0.0.0.0:5432); \
+	export PGPASSWORD="$(PROD_GCP_DB_PASSWORD)"; \
+	psql "host=127.0.0.1 sslmode=disable dbname=$(PROD_GCP_DB_USERNAME) user=$(PROD_GCP_DB_USERNAME)"; \
+	docker stop $$CONTAINER
