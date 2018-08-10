@@ -68,7 +68,7 @@ prod-upgrade:
 prod-status:
 	$(HELM) status $(HELM_RELEASE_NAME)
 
-prod-sql-connect:
+prod-psql:
 	export CONTAINER=$$(docker run --rm -d \
 		-v "$(PROD_GCP_DB_KEY_FILE)":/config:ro \
 		-p 127.0.0.1:5432:5432 \
