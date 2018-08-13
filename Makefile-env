@@ -106,7 +106,7 @@ endif
 SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
 
 env-cert-manager: env-helm
-	$(HELM) install --wait --name cert-manager --namespace kube-system stable/cert-manager
+	$(HELM) install --wait --name cert-manager --namespace kube-system --version v0.4.0 stable/cert-manager
 	# wait for booting
 	@until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
 		sleep 2; \
@@ -126,3 +126,6 @@ env-destroy-minikube:
 	@echo destroying minikube cluster, press enter to confirm...
 	@read _
 	$(MINIKUBE) delete 
+
+env-destroy-cert-manager:
+	$(HELM) delete --purge cert-manager
