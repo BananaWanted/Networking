@@ -5,8 +5,10 @@ ENV_OS_NAME ?= $(shell uname -s)
 
 ifeq ($(ENV_OS_NAME), Darwin)
 GREP := grep -E
+TC := nc -zvG 3
 else
 GREP := grep -P
+TC := nc -zvw 3
 endif
 
 BREW := $(shell command -v brew 2> /dev/null)
