@@ -40,6 +40,9 @@ prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
 		--from-file=credentials.json="$(PROD_GCP_DNS_KEY_FILE)"
 
+prod-secret-jwt-public-key:
+	$(KUBECTL) create secret generic auth0-secret --from-file=jwt.cert="$(PROD_JWT_PUBLIC_KEY_FILE)"
+
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
 PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
