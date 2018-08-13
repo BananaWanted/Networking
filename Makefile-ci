@@ -12,8 +12,8 @@ CI_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 ci: ci-prepare-env ci-build ci-run ci-after-success
 
 ci-prepare-env: env-kubernetes env-cert-manager ci-git-login ci-git-set-username-travis ci-docker-login
-	$(KUBECTL) create secret generic dns-secret \
-		--from-literal=credentials.json="test"
+	$(KUBECTL) create secret generic dns-secret --from-literal=credentials.json="test"
+	$(KUBECTL) create secret generic auth0-secret --from-literal=jwt.cert="test"
 
 ci-build: all
 
