@@ -63,3 +63,13 @@ app <-- app-test
  V
 sanic <-- sanic-test
 ```
+
+## TODO
+- access control: `PyJWT` vs `sanic-jwt`
+- request validation: `sanic-WTF` vs `sanic-validation` vs `sanic-attrs`
+- make APP_* env accepting `pkg.mod,pkg.mod` form (vs single `pkg.mod.obj` currently)
+- opt-in response compression: `sanic_compress`
+- integrate with redis: `sanic-redis-extension`
+- testing with `pytest-sanic` `pytest-asyncio` `pytest-aiohttp`
+- monitoring integration `sanic-prometheus`
+- localization support with `sanic-babel`
