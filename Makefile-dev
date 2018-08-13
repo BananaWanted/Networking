@@ -1,6 +1,5 @@
 # Everything defined in this file have prefix DEV_ or (dev-)
 DEV_PERSIST_DB ?=
-DEV_DNS_KEY_FILE ?= key.json
 DEV_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
 						--debug \
 						--set testing=true,notTesting=false \
@@ -16,8 +15,10 @@ endif
 
 dev-env: env-kubernetes env-sqitch noerror-env-cert-manager
 	-$(KUBECTL) delete secret dns-secret
-	-$(KUBECTL) create secret generic dns-secret --from-file=credentials.json="$(DEV_DNS_KEY_FILE)"
+	-$(KUBECTL) create secret generic dns-secret --from-file=credentials.json="$(GCP_DNS_KEY_FILE)"
 	-$(KUBECTL) create secret generic dns-secret --from-literal=credentials.json="test"
+	-$(KUBECTL) delete secret auth0-secret
+	-$(KUBECTL) create secret generic auth0-secret --from-file=jwt.cert="$(AUTH0_JWT_CERT)"
 	$(MINIKUBE) addons enable dashboard
 	$(MINIKUBE) addons open dashboard
 
