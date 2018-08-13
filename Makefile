@@ -9,11 +9,11 @@ DOCKER_REGISTRY ?= library
 DOCKER_PASSWORD ?=
 DOCKER_BUILD_ARGS ?= --build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) --build-arg BUILD_TAG=$(BUILD_TAG)
 GITHUB_TOKEN ?=
+ACME_EMAIL ?= acme@a.com
+GCP_DNS_PROJECT ?= gcp_dns_project
+GCP_DNS_KEY_FILE ?= service_account_key.json
 DDNS_ZONE ?= local
 AUTH0_JWT_CERT ?= auth0-jwt.cert
-ACME_EMAIL ?= acme@a.com
-ACME_DNS_PROJECT ?= acme_dns_project
-# TODO merge ACME_DNS_PROJECT and PROD_GCP_DNS_PROJECT
 SERVICE_HOSTS ?= {*}
 
 HELM_COMMON_FLAGS ?= --wait \
@@ -21,7 +21,7 @@ HELM_COMMON_FLAGS ?= --wait \
 					--set appConfigs.dns.env.DDNS_ZONE=$(DDNS_ZONE) \
 					--set hosts="$(SERVICE_HOSTS)" \
 					--set ACME.email="$(ACME_EMAIL)" \
-					--set ACME.dns.project="$(ACME_DNS_PROJECT)"
+					--set ACME.dns.project="$(GCP_DNS_PROJECT)"
 
 .PHONY: $(sort $(APPS) $(BASE_APPS) $(sort $(dir $(wildcard */))) all clean install test)
 

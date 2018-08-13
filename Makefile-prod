@@ -14,15 +14,11 @@ PROD_GCP_DB_PASSWORD ?=
 # Static IP Settings
 PROD_GCP_IP_REGION ?=
 
-# DNS Settings
-PROD_GCP_DNS_PROJECT ?=
-PROD_GCP_DNS_KEY_FILE ?=
-
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--set externalDNS.google.project="$(PROD_GCP_DNS_PROJECT)" \
-						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
+						--set externalDNS.google.project="$(GCP_DNS_PROJECT)" \
+						--set nginx-ingress.controller.service.loadBalancerIP="$(_PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
 						--set postgres.cloudsql.instances[0].region="$(PROD_GCP_DB_REGION)" \
@@ -38,14 +34,14 @@ prod-secret-database:
 
 prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
-		--from-file=credentials.json="$(PROD_GCP_DNS_KEY_FILE)"
+		--from-file=credentials.json="$(GCP_DNS_KEY_FILE)"
 
 prod-secret-jwt-public-key:
 	$(KUBECTL) create secret generic auth0-secret --from-file=jwt.cert="$(AUTH0_JWT_CERT)"
 
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
-PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
+_PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
 
 prod-prepare: prod-secret-database prod-secret-dns prod-static-ip env-cert-manager
 

@@ -24,7 +24,7 @@ hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: SERVICE_HOSTS
 ACME:
   email: acme@a.com   # ENV: ACME_EMAIL
   dns:
-    project: gcp-dns-project  # ENV: ACME_DNS_PROJECT
+    project: gcp-dns-project  # ENV: GCP_DNS_PROJECT
     secret: dns-secret
     secretKey: credentials.json
 
@@ -38,7 +38,7 @@ nginx-ingress:
       # default-ssl-certificate: default/tls-secret # overriding default cert, NO FAKE!
     service:
       externalTrafficPolicy: Local
-      loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
+      loadBalancerIP: 127.0.0.1 # AUTOENV: _PROD_GCP_LB_STATIC_IP
 
 externalDNS:
   nameOverride: external-dns
@@ -48,7 +48,7 @@ externalDNS:
   rbac:
     create: true
   google:
-    project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
+    project: gcp-dns-project  # ENV: GCP_DNS_PROJECT
     serviceAccountSecret: dns-secret
 
 postgres:
