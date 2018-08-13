@@ -27,6 +27,7 @@ async def server_info(request: Request):
         except BaseException as e:
             ret[k] = f'@@ error: {type(e)} {e} @@'
     return json({
+        "auth": request.get('auth'),
         "json": request.json,
         "token": request.token,
         "form": request.form,

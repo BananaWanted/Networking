@@ -1,6 +1,7 @@
 from importlib import import_module
 from os import environ
 
+import jwt
 from gino.ext.sanic import Gino
 from sanic import Sanic, Blueprint
 from sanic.request import Request
@@ -89,6 +90,36 @@ if APP_ORM_PATH:
     db_obj: Gino = getattr(orm_module, obj_name)
     db_obj.init_app(app)
 
+
+# Config JWT Auth
+if app.config.get('JWT_PUBLIC_KEY'):
+    with open(app.config['JWT_PUBLIC_KEY'], 'rb') as f_key:
+        JWT_PUBLIC_KEY = f_key.read()
+
+    @app.middleware("request")
+    async def check_jwt(request: Request):
+        header_key = request.headers.get("Authorization")
+        cookie_key = request.cookies.get("access_token")
+
+        if header_key and header_key.startswith("Bearer "):
+            access_token = header_key[len("Bearer "):]
+        elif cookie_key:
+            access_token = cookie_key
+        else:
+            return
+        try:
+            jwt_token = jwt.decode(access_token, JWT_PUBLIC_KEY, verify=True, algorithms='RS256')
+            request['auth'] = jwt_token
+        except jwt.InvalidTokenError:
+            pass
+
+
+# Health check endpoint
+@app.route("/status")
+def status(request: Request):
+    return text("sanic is running!")
+
+
 # Attach blueprint
 BLUEPRINT_PATH = environ["APP_BLUEPRINT"]
 path_fragments = BLUEPRINT_PATH.split(".")
@@ -98,13 +129,6 @@ obj_name = path_fragments[-1]
 bp_module = import_module(module_name)
 bp_obj: Blueprint = getattr(bp_module, obj_name)
 app.blueprint(bp_obj)
-
-
-# Setup health check endpoint
-@app.route("/status")
-def status(request: Request):
-    return text("sanic is running!")
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)

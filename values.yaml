@@ -16,14 +16,15 @@ notTesting: true   # workaround the issue that currently no way to have logic no
 dockerRegistry: library   # docker registry path for image pulling.  ENV: DOCKER_REGISTRY
 buildTag: latest             # the build tag to use.   ENV: BUILD_TAG
 tlsSecret: tls-secret     # secret storing the tls certs for ingress.
-databaseSecret: &databaseSecret database-secret  # secret for connecting to Cloud SQL database.
+databaseSecret: database-secret  # secret for connecting to Cloud SQL database.
+auth0Secret: auth0-secret
 hosts:  # Ingress hosts. Accepts "*" as for default host. ENV: SERVICE_HOSTS
   - "*"
 
 ACME:
   email: acme@a.com   # ENV: ACME_EMAIL
   dns:
-    project: gcp-dns-project  # ENV: ACME_DNS_PROJECT
+    project: gcp-dns-project  # ENV: GCP_DNS_PROJECT
     secret: dns-secret
     secretKey: credentials.json
 
@@ -37,7 +38,7 @@ nginx-ingress:
       # default-ssl-certificate: default/tls-secret # overriding default cert, NO FAKE!
     service:
       externalTrafficPolicy: Local
-      loadBalancerIP: 127.0.0.1 # AUTOENV: PROD_GCP_LB_STATIC_IP
+      loadBalancerIP: 127.0.0.1 # AUTOENV: _PROD_GCP_LB_STATIC_IP
 
 externalDNS:
   nameOverride: external-dns
@@ -47,11 +48,11 @@ externalDNS:
   rbac:
     create: true
   google:
-    project: gcp-dns-project  # ENV: PROD_GCP_DNS_PROJECT
+    project: gcp-dns-project  # ENV: GCP_DNS_PROJECT
     serviceAccountSecret: dns-secret
 
 postgres:
-  existingSecret: *databaseSecret
+  existingSecret: database-secret
   existingSecretKey: instance-credential
   cloudsql:
     instances:
@@ -88,10 +89,12 @@ appConfigs:
     env:
       DDNS_ZONE: local  # ENV: DDNS_ZONE
       GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/credentials.json
-      WEB_CONCURRENCY: 1
+      JWT_PUBLIC_KEY: /var/secrets/auth0/jwt.cert
     mountSecrets:
     - name: dns-secret
       path: /var/secrets/google/
+    - name: auth0-secret
+      path: /var/secrets/auth0/
   misc:
     type: service
     pullPolicy: IfNotPresent
@@ -105,7 +108,10 @@ appConfigs:
     - path: "/server-info"
     envDatabase: false
     env:
-      WEB_CONCURRENCY: 1
+      JWT_PUBLIC_KEY: /var/secrets/auth0/jwt.cert
+    mountSecrets:
+    - name: auth0-secret
+      path: /var/secrets/auth0/
   db-vcs:
     type: task
     pullPolicy: IfNotPresent

@@ -14,15 +14,11 @@ PROD_GCP_DB_PASSWORD ?=
 # Static IP Settings
 PROD_GCP_IP_REGION ?=
 
-# DNS Settings
-PROD_GCP_DNS_PROJECT ?=
-PROD_GCP_DNS_KEY_FILE ?=
-
 # Other Settings
 
 PROD_HELM_COMMON_FLAGS ?= $(HELM_COMMON_FLAGS) \
-						--set externalDNS.google.project="$(PROD_GCP_DNS_PROJECT)" \
-						--set nginx-ingress.controller.service.loadBalancerIP="$(PROD_GCP_LB_STATIC_IP)" \
+						--set externalDNS.google.project="$(GCP_DNS_PROJECT)" \
+						--set nginx-ingress.controller.service.loadBalancerIP="$(_PROD_GCP_LB_STATIC_IP)" \
 						--set postgres.cloudsql.instances[0].instance="$(PROD_GCP_DB_INSTANCE)" \
 						--set postgres.cloudsql.instances[0].project="$(PROD_GCP_DB_PROJECT)" \
 						--set postgres.cloudsql.instances[0].region="$(PROD_GCP_DB_REGION)" \
@@ -38,11 +34,14 @@ prod-secret-database:
 
 prod-secret-dns:
 	$(KUBECTL) create secret generic dns-secret \
-		--from-file=credentials.json="$(PROD_GCP_DNS_KEY_FILE)"
+		--from-file=credentials.json="$(GCP_DNS_KEY_FILE)"
+
+prod-secret-jwt-public-key:
+	$(KUBECTL) create secret generic auth0-secret --from-file=jwt.cert="$(AUTH0_JWT_CERT)"
 
 prod-static-ip:
 	gcloud compute addresses create static-ip --region $(PROD_GCP_IP_REGION)
-PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
+_PROD_GCP_LB_STATIC_IP = $(shell gcloud compute addresses describe static-ip --region $(PROD_GCP_IP_REGION) --format="table[no-heading](address)" 2> /dev/null)
 
 prod-prepare: prod-secret-database prod-secret-dns prod-static-ip env-cert-manager
 
@@ -60,10 +59,21 @@ prod-install-dryrun:
 	$(HELM) install $(PROD_HELM_COMMON_FLAGS) --dry-run --debug .
 
 prod-upgrade:
-	$(MAKE) prod-install-dryrun
+	$(HELM) upgrade --debug --dry-run --reset-values --force $(PROD_HELM_COMMON_FLAGS) $(HELM_RELEASE_NAME) .
 	@echo confirm?
 	@read _
 	$(HELM) upgrade --reset-values --force $(PROD_HELM_COMMON_FLAGS) $(HELM_RELEASE_NAME) .
 
 prod-status:
 	$(HELM) status $(HELM_RELEASE_NAME)
+
+prod-psql:
+	export CONTAINER=$$(docker run --rm -d \
+		-v "$(PROD_GCP_DB_KEY_FILE)":/config:ro \
+		-p 127.0.0.1:5432:5432 \
+		gcr.io/cloudsql-docker/gce-proxy:1.11 \
+		/cloud_sql_proxy -credential_file=/config \
+			-instances=$(PROD_GCP_DB_PROJECT):$(PROD_GCP_DB_REGION):$(PROD_GCP_DB_INSTANCE)=tcp:0.0.0.0:5432); \
+	export PGPASSWORD="$(PROD_GCP_DB_PASSWORD)"; \
+	psql "host=127.0.0.1 sslmode=disable dbname=$(PROD_GCP_DB_USERNAME) user=$(PROD_GCP_DB_USERNAME)"; \
+	docker stop $$CONTAINER
