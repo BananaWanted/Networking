@@ -17,6 +17,7 @@ Makefile*
 *.log
 .git/
 .gitignore
+.gitattributes
 .bzr/
 .bzrignore
 .hg/
