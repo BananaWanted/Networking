@@ -79,9 +79,9 @@ else
 	sudo mv minikube /usr/local/bin/
 endif
 ifeq ($(ENV_OS_NAME), Darwin)
-	minikube --alsologtostderr start --vm-driver hyperkit --kubernetes-version v1.10.6
+	minikube status || minikube --alsologtostderr start --vm-driver hyperkit --kubernetes-version v1.10.6
 else
-	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none --kubernetes-version v1.10.6
+	minikube status || sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none --kubernetes-version v1.10.6
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
