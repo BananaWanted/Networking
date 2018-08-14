@@ -1,5 +1,0 @@
-// @flow
-
-const server = next()
-
-
