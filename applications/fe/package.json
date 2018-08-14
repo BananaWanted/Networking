@@ -1,0 +1,11 @@
+{
+  "name": "fe",
+  "version": "0.0.0",
+  "description": "single app fe service",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "auth0-js": "^9.7.3",
+    "react": "^16.4.2"
+  }
+}
