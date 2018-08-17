@@ -1,0 +1,31 @@
+{
+    "yaml.format.enable": true,
+    "yaml.validate": true,
+    "[yaml]": {
+        "editor.useTabStops": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": true,
+    },
+    "[helm]": {
+        "editor.useTabStops": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": true,
+    },
+    "python.pythonPath": "/usr/local/opt/python/bin/python3.7",
+    "python.linting.enabled": false,
+
+    "npm.packageManager": "yarn",
+    "flow.pathToFlow": "${workspaceRoot}/applications/fe/node_modules/.bin/flow",
+    "flow.showUncovered": true,
+    "flow.runOnEdit": true,
+    "flow.runOnAllFiles": true,
+    "cSpell.language": "en",
+    "cSpell.words": [
+        "ddns",
+        "openid",
+        "prefetch",
+        "userinfo"
+    ],
+}
