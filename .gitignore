@@ -1,6 +1,5 @@
 node_modules
 *.tar.gz
-.vscode
 .DS_Store
 .idea
 __pycache__

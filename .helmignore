@@ -1,6 +1,5 @@
 node_modules
 *.tar.gz
-.vscode
 .DS_Store
 .idea
 __pycache__
@@ -11,6 +10,7 @@ __pycache__
 # == end gitignore shared section ==
 
 applications/
+.vscode/
 .travis.yml
 Makefile*
 *.log
