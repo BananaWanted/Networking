@@ -108,7 +108,6 @@ SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitc
 env-cert-manager: env-helm
 	$(HELM) install --wait --debug --name cert-manager --namespace kube-system \
 		stable/cert-manager
-		# --set extraArgs='{--dns01-self-check-nameservers=8.8.8.8:53\,1.1.1.1:53,--logtostderr,--log-flush-frequency=1s,--stderrthreshold=4,--v=4}' \
 	# wait for booting
 	@until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
 		sleep 2; \
