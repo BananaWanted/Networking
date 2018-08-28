@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "auth0-js": "^9.7.3",
+    "lodash": "^4.17.10",
     "next": "^7.0.0-canary.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -18,7 +19,7 @@
   },
   "devDependencies": {
     "@babel/preset-flow": "^7.0.0-rc.1",
-    "flow-bin": "^0.78.0",
+    "flow-bin": "^0.79.1",
     "flow-typed": "^2.5.1"
   }
 }
