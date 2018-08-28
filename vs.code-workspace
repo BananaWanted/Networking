@@ -1,0 +1,67 @@
+{
+	"folders": [
+		{
+			"path": "applications/fe"
+		},
+		{
+			"path": "applications/auth"
+		},
+		{
+			"path": "applications/db-vcs"
+		},
+		{
+			"path": "applications/dns"
+		},
+		{
+			"path": "applications/misc"
+		},
+		{
+			"path": "applications/sanic"
+		},
+		{
+			"path": "applications/sqitch"
+		},
+		{
+			"path": "applications/wait-for-db"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"yaml.format.enable": true,
+		"yaml.validate": true,
+		"[yaml]": {
+			"editor.useTabStops": true,
+			"editor.insertSpaces": true,
+			"editor.tabSize": 2,
+			"editor.autoIndent": true,
+		},
+		"[helm]": {
+			"editor.useTabStops": true,
+			"editor.insertSpaces": true,
+			"editor.tabSize": 2,
+			"editor.autoIndent": true,
+		},
+		"python.pythonPath": "/usr/local/opt/python/bin/python3.7",
+		"python.linting.enabled": false,
+	
+		"npm.packageManager": "yarn",
+		"prettier.jsxBracketSameLine": true,
+		"prettier.printWidth": 120,
+		"prettier.tabWidth": 4,
+		"prettier.singleQuote": true,
+		"prettier.trailingComma": "es5",
+		"prettier.parser": "flow",
+		"prettier.semi": true,
+		"prettier.bracketSpacing": true,
+
+		"cSpell.language": "en",
+		"cSpell.words": [
+			"ddns",
+			"openid",
+			"prefetch",
+			"userinfo"
+		],
+	}
+}
