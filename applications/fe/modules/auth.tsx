@@ -1,5 +1,4 @@
-// @flow
-
+import _ from 'lodash';
 import auth0 from 'auth0-js';
 import getConfig from 'next/config';
 import URL from 'url-parse';
@@ -12,7 +11,7 @@ type AuthResult = {
     accessToken: string,
     expiresIn: number,
     state: string,
-    tokenType: "Bearer",
+    tokenType: 'Bearer',
     idToken: string,
     idTokenPayload: Object,
 };
@@ -20,7 +19,7 @@ type AuthResult = {
 type AuthProfile = {
     accessToken: string,
     expiresAt: number,
-    jwt: Object,
+    jwt: string,
 };
 
 export default class Auth {
@@ -65,11 +64,11 @@ export default class Auth {
     };
 
     setSession = (result: AuthResult) => {
-        let profile: AuthProfile = {
+        let profile: AuthProfile = _.merge(result.idTokenPayload, {
             accessToken: result.accessToken,
             expiresAt: result.expiresIn * 1000 + new Date().getTime(),
-            jwt: result.idTokenPayload,
-        };
+            jwt: result.idToken,
+        });
         console.log('got profile:', profile);
         let expiresAt = JSON.stringify();
         localStorage.setItem(authProfileStorageKey, JSON.stringify(profile));

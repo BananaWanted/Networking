@@ -5,11 +5,13 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@zeit/next-typescript": "^1.1.0",
     "auth0-js": "^9.7.3",
     "lodash": "^4.17.10",
     "next": "^7.0.0-canary.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "typescript": "^3.0.3",
     "url-parse": "^1.4.3"
   },
   "scripts": {
@@ -18,8 +20,9 @@
     "start": "next start"
   },
   "devDependencies": {
-    "@babel/preset-flow": "^7.0.0-rc.1",
-    "flow-bin": "^0.79.1",
-    "flow-typed": "^2.5.1"
+    "@types/auth0-js": "^8.11.5",
+    "@types/lodash": "^4.14.116",
+    "@types/next": "^6.1.4",
+    "@types/react": "^16.4.13"
   }
 }

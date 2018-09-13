@@ -1,7 +1,5 @@
-// @flow
-
-import React from 'react';
 import Auth from '../modules/auth';
+import React from 'react';
 
 export default class Next extends React.Component<{}> {
     render() {

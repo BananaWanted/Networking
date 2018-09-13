@@ -1,6 +1,3 @@
 {
-    "flow.useNPMPackagedFlow": true,
-    "flow.showUncovered": true,
-    "flow.runOnEdit": true,
-    "flow.runOnAllFiles": true,
+    "eslint.packageManager": "yarn"
 }

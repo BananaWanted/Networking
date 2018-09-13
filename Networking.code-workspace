@@ -4,27 +4,6 @@
 			"path": "applications/fe"
 		},
 		{
-			"path": "applications/auth"
-		},
-		{
-			"path": "applications/db-vcs"
-		},
-		{
-			"path": "applications/dns"
-		},
-		{
-			"path": "applications/misc"
-		},
-		{
-			"path": "applications/sanic"
-		},
-		{
-			"path": "applications/sqitch"
-		},
-		{
-			"path": "applications/wait-for-db"
-		},
-		{
 			"path": "."
 		}
 	],
@@ -55,10 +34,11 @@
 		"prettier.parser": "flow",
 		"prettier.semi": true,
 		"prettier.bracketSpacing": true,
-
+	
 		"cSpell.language": "en",
 		"cSpell.words": [
 			"ddns",
+			"nocheck",
 			"openid",
 			"prefetch",
 			"userinfo"

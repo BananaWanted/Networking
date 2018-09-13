@@ -1,5 +1,4 @@
 module.exports = {
-    distDir: 'dist',
     generateBuildId: () => process.env.BUILD_TAG,
     serverRuntimeConfig: {
     },
