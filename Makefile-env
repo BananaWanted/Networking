@@ -5,8 +5,10 @@ ENV_OS_NAME ?= $(shell uname -s)
 
 ifeq ($(ENV_OS_NAME), Darwin)
 GREP := grep -E
+TC := nc -zvG 3
 else
 GREP := grep -P
+TC := nc -zvw 3
 endif
 
 BREW := $(shell command -v brew 2> /dev/null)
@@ -77,9 +79,9 @@ else
 	sudo mv minikube /usr/local/bin/
 endif
 ifeq ($(ENV_OS_NAME), Darwin)
-	minikube --alsologtostderr start --vm-driver hyperkit --kubernetes-version v1.10.6
+	minikube status || minikube --alsologtostderr start --vm-driver hyperkit --kubernetes-version v1.10.6
 else
-	sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none --kubernetes-version v1.10.6
+	minikube status || sudo CHANGE_MINIKUBE_NONE_USER=true minikube --alsologtostderr start --vm-driver none --kubernetes-version v1.10.6
 endif
 	# wait for booting
 	JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; \
@@ -104,7 +106,8 @@ endif
 SQITCH = docker run --rm -it -v $$(realpath .)/applications/db-vcs/sqitch:/sqitch $(DOCKER_REGISTRY)/sqitch:$(BUILD_TAG) sqitch
 
 env-cert-manager: env-helm
-	$(HELM) install --wait --name cert-manager --namespace kube-system stable/cert-manager
+	$(HELM) install --wait --debug --name cert-manager --namespace kube-system \
+		stable/cert-manager
 	# wait for booting
 	@until $(KUBECTL) get deployment cert-manager -n kube-system -o jsonpath='{range @.status.conditions[*]}{@.type}={@.status};' 2>&1 | $(GREP) -q 'Available=True;'; do \
 		sleep 2; \
@@ -124,3 +127,6 @@ env-destroy-minikube:
 	@echo destroying minikube cluster, press enter to confirm...
 	@read _
 	$(MINIKUBE) delete 
+
+env-destroy-cert-manager:
+	$(HELM) delete --purge cert-manager

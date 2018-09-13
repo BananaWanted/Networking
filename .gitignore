@@ -1,16 +1,17 @@
-*.tgz
+node_modules
 *.tar.gz
-.vscode
 .DS_Store
 .idea
-Makefile-local
-# Byte-compiled / optimized / DLL files
-__pycache__/
+__pycache__
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+.next
+
+# == end gitignore shared section ==
+
+*.tgz
+Makefile-local
 
 # Distribution / packaging
 .Python

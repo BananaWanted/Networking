@@ -38,6 +38,7 @@ class _PatchedRequest(Request):
     # TODO leverage x-original-uri
 
     def url_for(self, view_name, **kwargs):
+        # TODO support view_name in "/endpoint" / view class
         # new from original
         return self.app.url_for(
             view_name,

@@ -1,27 +1,27 @@
+node_modules
 *.tar.gz
-applications/
-.travis.yml
-Makefile
-*.log
-
-# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
 .DS_Store
-# Common VCS dirs
+.idea
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.next
+
+# == end gitignore shared section ==
+
+applications/
+.vscode/
+.travis.yml
+Makefile*
+*.log
 .git/
 .gitignore
+.gitattributes
 .bzr/
 .bzrignore
 .hg/
 .hgignore
 .svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
 *~
-# Various IDEs
 .project
-.idea/
-*.tmproj
