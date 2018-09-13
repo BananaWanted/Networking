@@ -63,3 +63,11 @@ dev-docker-%:
 
 dev-open:
 	$(MINIKUBE) service release-local-nginx-ingress-controller --url | cut -c 8- | xargs -n 2 echo | awk '{print "http://"$$1"/server-info"; print "https://"$$2"/server-info"}' | xargs -n 1 open
+
+_FE_ENV = AUTH0_DOMAIN=$(AUTH0_DOMAIN) AUTH0_CLIENT_ID=$(AUTH0_CLIENT_ID)
+
+dev-fe: dev-fe-flow-typed\ install
+	cd applications/fe && $(_FE_ENV) yarn run dev $(ARGS)
+
+dev-fe-%:
+	cd applications/fe && $(_FE_ENV) yarn $* $(ARGS)

@@ -13,6 +13,8 @@ ACME_EMAIL ?= acme@a.com
 GCP_DNS_PROJECT ?= gcp_dns_project
 GCP_DNS_KEY_FILE ?= service_account_key.json
 DDNS_ZONE ?= local
+AUTH0_DOMAIN ?= my.auth0.domain
+AUTH0_CLIENT_ID ?= my-client-id
 AUTH0_JWT_CERT ?= auth0-jwt.cert
 SERVICE_HOSTS ?= {*}
 
