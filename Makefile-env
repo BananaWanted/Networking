@@ -130,3 +130,27 @@ env-destroy-minikube:
 
 env-destroy-cert-manager:
 	$(HELM) delete --purge cert-manager
+
+_NODE_NAME := networking-aio
+_LAUNCH_NODE := gcloud compute instances create $(_NODE_NAME) --machine-type=f1-micro --maintenance-policy=MIGRATE --service-account=$(_NODE_NAME)@super-networking.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server,https-server --image=ubuntu-minimal-1804-bionic-v20180917 --image-project=ubuntu-os-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=$(_NODE_NAME)
+_VERIFY_NODE :=	gcloud compute instances list --format="table(NAME,EXTERNAL_IP,STATUS)" --filter="NAME:$(_NODE_NAME)" | tee /dev/stderr | grep RUNNING > /dev/null
+env-single-node-cluster:
+	# verifying dependencies...
+	@which bash
+	@which tee
+	@which grep
+	@which ssh
+	@which gcloud
+	# bootstrap gcp vm instance, ensuring the cluster is up and running
+	@if ! $(_VERIFY_NODE); then \
+		$(_LAUNCH_NODE); \
+		echo waiting for new node starting...; \
+		until $(_VERIFY_NODE); do \
+			sleep 2; \
+			echo .; \
+		done; \
+	fi
+	# refresh gcloud ssh configs
+	gcloud compute config-ssh
+	# ssh to the node
+	gcloud compute ssh $(_NODE_NAME) 
