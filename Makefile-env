@@ -143,6 +143,7 @@ _LAUNCH_NODE := gcloud compute instances create \
 			--service-account=$(_NODE_NAME)@$(_NODE_PROJECT).iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform \
 			--tags=http-server,https-server
 _VERIFY_NODE :=	gcloud compute instances list --format="table(NAME,EXTERNAL_IP,STATUS)" --filter="NAME:$(_NODE_NAME)" | tee /dev/stderr | grep RUNNING > /dev/null
+_GET_NODE_IP := gcloud compute instances list --format="table[no-heading](EXTERNAL_IP)" --filter="NAME:$(_NODE_NAME)"
 env-single-node-cluster:
 	# verifying dependencies...
 	@which bash
@@ -155,14 +156,15 @@ env-single-node-cluster:
 	@if ! $(_VERIFY_NODE); then \
 		$(_LAUNCH_NODE); \
 		echo waiting for new node starting...; \
-		$(_VERIFY_NODE); \
-		until $(_VERIFY_NODE) > /dev/null && $(TC) $(_NODE_HOST_NAME) 22 > /dev/null; do \
+		until $(_VERIFY_NODE) && $(TC) $$($(_GET_NODE_IP)) 22 2> /dev/null; do \
 			echo .; \
 			sleep 2; \
 		done; \
 	fi
 	# refresh gcloud ssh configs
 	gcloud compute config-ssh --quiet > /dev/null
+	# waiting for ssh start to work
+	until ssh -o StrictHostKeyChecking=accept-new $(_NODE_HOST_NAME) echo it works!; do echo .; done
 	# running install script through ssh
 	echo ' \
 		hostname; \
