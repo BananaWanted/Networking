@@ -132,7 +132,16 @@ env-destroy-cert-manager:
 	$(HELM) delete --purge cert-manager
 
 _NODE_NAME := networking-aio
-_LAUNCH_NODE := gcloud compute instances create $(_NODE_NAME) --machine-type=f1-micro --maintenance-policy=MIGRATE --service-account=$(_NODE_NAME)@super-networking.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server,https-server --image=ubuntu-minimal-1804-bionic-v20180917 --image-project=ubuntu-os-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=$(_NODE_NAME)
+_NODE_PROJECT := $(shell gcloud config get-value project)
+_NODE_ZONE := $(shell gcloud config get-value compute/zone)
+_NODE_HOST_NAME := $(_NODE_NAME).$(_NODE_ZONE).$(_NODE_PROJECT)
+_LAUNCH_NODE := gcloud compute instances create \
+			$(_NODE_NAME) --machine-type=f1-micro \
+			--image=ubuntu-minimal-1804-bionic-v20180917 --image-project=ubuntu-os-cloud \
+			--boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=$(_NODE_NAME) \
+			--maintenance-policy=MIGRATE \
+			--service-account=$(_NODE_NAME)@$(_NODE_PROJECT).iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform \
+			--tags=http-server,https-server
 _VERIFY_NODE :=	gcloud compute instances list --format="table(NAME,EXTERNAL_IP,STATUS)" --filter="NAME:$(_NODE_NAME)" | tee /dev/stderr | grep RUNNING > /dev/null
 env-single-node-cluster:
 	# verifying dependencies...
@@ -141,16 +150,32 @@ env-single-node-cluster:
 	@which grep
 	@which ssh
 	@which gcloud
+	@which nc
 	# bootstrap gcp vm instance, ensuring the cluster is up and running
 	@if ! $(_VERIFY_NODE); then \
 		$(_LAUNCH_NODE); \
 		echo waiting for new node starting...; \
-		until $(_VERIFY_NODE); do \
-			sleep 2; \
+		$(_VERIFY_NODE); \
+		until $(_VERIFY_NODE) > /dev/null && $(TC) $(_NODE_HOST_NAME) 22 > /dev/null; do \
 			echo .; \
+			sleep 2; \
 		done; \
 	fi
 	# refresh gcloud ssh configs
-	gcloud compute config-ssh
-	# ssh to the node
-	gcloud compute ssh $(_NODE_NAME) 
+	gcloud compute config-ssh --quiet > /dev/null
+	# running install script through ssh
+	echo ' \
+		hostname; \
+		id; \
+		apt-get update; \
+		apt-get install -y apt-transport-https ca-certificates curl software-properties-common git; \
+		curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -; \
+		add-apt-repository "deb https://download.docker.com/linux/$$(. /etc/os-release; echo "$$ID") $$(lsb_release -cs) stable"; \
+		apt-get update && apt-get install -y docker-ce; \
+		\
+		curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -; \
+		echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list; \
+		apt-get update; \
+		apt-get install -y kubelet kubeadm kubectl; \
+		apt-mark hold kubelet kubeadm kubectl; \
+	' | ssh $(_NODE_HOST_NAME) sudo bash -s
