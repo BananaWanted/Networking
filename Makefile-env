@@ -164,7 +164,7 @@ env-single-node-cluster:
 	# refresh gcloud ssh configs
 	gcloud compute config-ssh --quiet > /dev/null
 	# waiting for ssh start to work
-	until ssh -o StrictHostKeyChecking=accept-new $(_NODE_HOST_NAME) echo it works!; do echo .; done
+	until ssh -o StrictHostKeyChecking=accept-new $(_NODE_HOST_NAME) echo it works! 2>/dev/null; do echo .; sleep 2; done
 	# running install script through ssh
 	echo ' \
 		hostname; \
