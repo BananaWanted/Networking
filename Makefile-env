@@ -136,7 +136,7 @@ _NODE_PROJECT := $(shell gcloud config get-value project)
 _NODE_ZONE := $(shell gcloud config get-value compute/zone)
 _NODE_HOST_NAME := $(_NODE_NAME).$(_NODE_ZONE).$(_NODE_PROJECT)
 _LAUNCH_NODE := gcloud compute instances create \
-			$(_NODE_NAME) --machine-type=f1-micro \
+			$(_NODE_NAME) --machine-type=g1-small \
 			--image=ubuntu-minimal-1804-bionic-v20180917 --image-project=ubuntu-os-cloud \
 			--boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=$(_NODE_NAME) \
 			--maintenance-policy=MIGRATE \
@@ -169,6 +169,7 @@ env-single-node-cluster:
 	echo ' \
 		hostname; \
 		id; \
+		swapoff -a; \
 		apt-get update; \
 		apt-get install -y apt-transport-https ca-certificates curl software-properties-common git; \
 		curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -; \
@@ -180,4 +181,6 @@ env-single-node-cluster:
 		apt-get update; \
 		apt-get install -y kubelet kubeadm kubectl; \
 		apt-mark hold kubelet kubeadm kubectl; \
+		kubeadm config images pull; \
+		kubeadm init; \
 	' | ssh $(_NODE_HOST_NAME) sudo bash -s
